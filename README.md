@@ -4,6 +4,10 @@
 - [TOML Language Support](https://marketplace.visualstudio.com/items?itemName=be5invis.toml) TOML language support.
 - [CodeLLDB](https://marketplace.visualstudio.com/items?itemName=vadimcn.vscode-lldb) Rust debugger.
 
+#### Links:
+- [rust book](https://doc.rust-lang.org/book/) Rust language docs.
+- [cargo ref](https://doc.rust-lang.org/cargo/reference/manifest.html) Reference doc for Cargo.toml files.
+- [crates](https://crates.io/) Cargo package repository.
 
 #### Files:
 ```
