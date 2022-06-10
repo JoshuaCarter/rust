@@ -13,7 +13,7 @@
 
 These steps assume you are using VSCode.
 
-- Install cargo (see [this guide](https://doc.rust-lang.org/cargo/getting-started/installation.html)).
+- Install rustup and cargo (see [this guide](https://doc.rust-lang.org/cargo/getting-started/installation.html)).
 - Install these VSCode extensions:
     - [Rust language support](https://marketplace.visualstudio.com/items?itemName=rust-lang.rust-analyzer)
     - [Rust debugger](https://marketplace.visualstudio.com/items?itemName=vadimcn.vscode-lldb)
