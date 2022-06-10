@@ -2,11 +2,11 @@
 use rusty::{
     math2d::*,
     render::*,
-    math2d::utils::*,
+    math2d::utils::hello_world::hello_world,
 };
 
 fn main() {
-    HelloWorld();
+    hello_world();
 
     // const
     let tmp: bool = true;
