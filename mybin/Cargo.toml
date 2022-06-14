@@ -1,0 +1,12 @@
+# https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[package]
+name = "mybin"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+mylib = { path = "../mylib", version = "0.1.0" }
+rand = "0.8.5"
+
+[dev-dependencies]

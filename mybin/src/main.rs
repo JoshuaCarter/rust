@@ -1,9 +1,20 @@
-// rusty is the name of our lib (and bin) as defined by Cargo.toml
-use rusty::{
+// mylib is the name of our lib as defined by Cargo.toml
+use mylib::{
     math2d::*,
     render::*,
     math2d::utils::hello_world::hello_world,
 };
+
+// funcs with type restriction
+fn print_a<F>(f: F) where F: Print {
+    f.print();
+}
+fn print_b<F: Print>(f: F) {
+    f.print();
+}
+fn print_c<F: Print>(f: F) -> impl Fn() {
+    move || f.print()
+}
 
 fn main() {
     hello_world();
@@ -32,6 +43,9 @@ fn main() {
     printable.add(1, 2).add(1, 2);
     // custom trait to shothand display printing
     printable.print();
+    print_a(printable);
+    print_b(printable);
+    print_c(printable)();
 
     for (i, x) in ["a", "b", "c"].iter().enumerate() {
         print!("{}", x);

@@ -1,6 +1,6 @@
 #[cfg(test)]
 mod integration {
-    use rusty::*;
+    use mylib::*;
 
     #[test]
     fn test_1() {

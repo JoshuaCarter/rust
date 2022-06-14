@@ -1,12 +1,4 @@
 # https://doc.rust-lang.org/cargo/reference/manifest.html
 
-[package]
-name = "rusty"
-version = "0.1.0"
-edition = "2021"
-include = ["/src"]
-
-[dependencies]
-rand = "0.8.5"
-
-[dev-dependencies]
+[workspace]
+members = ["mybin", "mylib"]
