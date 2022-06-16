@@ -11,6 +11,17 @@ impl Point2 {
     pub fn new(x: i32, y: i32) -> Point2 {
         return Point2{x, y};
     }
+
+    /// Add to x and y
+    ///
+    /// ```
+    /// # // must use full path as though running in external main()
+    /// let mut a = mylib::Point2::new(1, 1);
+    /// a.add(1, 1);
+    ///
+    /// assert_eq!(a.x, 2, "x wrong value");
+    /// assert_eq!(a.y, 2, "y wrong value");
+    /// ```
     pub fn add(&mut self, x: i32, y: i32) -> &mut Point2 {
         self.x += x;
         self.y += y;

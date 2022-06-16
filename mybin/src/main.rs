@@ -5,7 +5,33 @@ use mylib::{
     math2d::utils::hello_world::hello_world,
 };
 
-// funcs with type restriction
+use std::{thread, ops::Add};
+
+// macro example
+macro_rules! join {
+    ($threads:ident) => {
+        for t in $threads {
+            let _ = t.join();
+        }
+    };
+}
+
+/// First line is a short summary describing function.
+///
+/// The next lines present detailed documentation. Code blocks start with
+/// triple backquotes and have implicit `fn main()` inside
+/// and `extern crate <cratename>`. Assume we're testing `doccomments` crate:
+///
+/// ```no_run
+/// use self::add;
+/// let result = add(2, 3);
+/// assert_eq!(result, 5);
+/// ```
+#[allow(dead_code)]
+fn add<T: Add<Output = T>>(a: T, b: T) -> T {
+    a + b
+}
+
 fn print_a<F>(f: F) where F: Print {
     f.print();
 }
@@ -15,9 +41,28 @@ fn print_b<F: Print>(f: F) {
 fn print_c<F: Print>(f: F) -> impl Fn() {
     move || f.print()
 }
+fn print_d(f: impl Print) {
+    f.print();
+}
+
+fn print_os() {
+    if cfg!(target_os = "linux") {
+        println!("You are running linux!");
+    }
+    else if cfg!(target_os = "windows") {
+        println!("You are running windows!");
+    }
+    else if cfg!(target_os = "macos") {
+        println!("You are running macos!");
+    }
+    else {
+        println!("Youre OS is unknown!");
+    }
+}
 
 fn main() {
     hello_world();
+    print_os();
 
     // const
     let tmp: bool = true;
@@ -46,6 +91,7 @@ fn main() {
     print_a(printable);
     print_b(printable);
     print_c(printable)();
+    print_d(printable);
 
     for (i, x) in ["a", "b", "c"].iter().enumerate() {
         print!("{}", x);
@@ -54,4 +100,18 @@ fn main() {
 
     let nested: Point3 = Point3::new(1, 2, 3);
     nested.print();
+
+    // threading
+    let mut threads = Vec::new();
+    for i in 0..10 {
+        threads.push(thread::spawn(move || {
+            println!("Thread {}", i);
+        }));
+    }
+
+    // our custom macro expands into
+    // for t in threads {
+    //     let _ = t.join();
+    // }
+    join!(threads);
 }

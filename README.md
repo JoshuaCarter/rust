@@ -30,7 +30,7 @@ These steps assume you are using VSCode.
 - `cargo run` Run a binary or example of the local package.
 - `cargo test` Run the tests.
 
-## Project Structure
+## Project Anatomy
 
 ### Terms
 
@@ -38,9 +38,10 @@ These steps assume you are using VSCode.
 | --- | --- | --- | --- | --- | --- |
 | Workspace | Folder | Contains packages. | Defaults to the location of the top `Cargo.toml` file. | 1 | 1-n packages |
 | Package | Folder | Source from which crates are built.| Defaults to workspace and must have `Cargo.toml` and `src/` in root. | 1-n | 1-n crates |
-| Crate | Folder | Umbrella term for compiled binary, libraries, exercises, and integration tests. | Entry points default to `src/main.rs`, `src/lib.rs`, `src/exercises/`, `src/tests/`. | 1-n | 1-n modules |
-| Module | File / Folder | Compilation unit built from `*.rs` files (excluding `src/main.rs` and `src/lib.rs`). | `mod.rs` files required to define modules that are folders. | 1-n | 0-n submodules |
-| Submodule | File / Folder | Any module located directly under the folder for the current module. | | | 0-n definitions |
+| Crate | Folder | Umbrella term for compiled binary, libraries, exercises, integration tests, and the source that builds them. | Entry points default to `src/main.rs`, `src/lib.rs`, `src/exercises/`, `src/tests/`. | 1-n | 1-n modules |
+| Module | File / Folder | Compilation unit built from `*.rs` files (excluding `src/main.rs` and `src/lib.rs`). | `mod.rs` files required to define modules that are folders. | 1-n | 0-n items, 0-n submodules |
+| Submodule | See module | Any module located directly under the folder for the current module. | Only root module cannot be a submodule. | | See module |
+| Item | Code | Component of a crate, mostly definitions. | Many types [see the docs](https://doc.rust-lang.org/reference/items.html). | 0-n | |
 | Library | File | Compiled code library. | Defaults to `src/lib.rs`. | 0-1 | |
 | Binary | File | Executable compiled from local source code and imported libraries. | Defaults to `src/main.rs`. | 0-n | |
 
@@ -91,3 +92,45 @@ A module can take two basic forms:
     - **Optionally** re-export definitions from submodules via `use`.
     - **Optionally** contains a submodule file with name matching `{dir}` to hold this module's definitions (re-exported in `mod.rs`).
     - **Avoid** re-exporting definitions from descendent modules.
+
+
+### Documentation
+
+DocBlocks are denoted by `///` and use markdown formatting.
+
+```
+/// First line is short summary.
+///
+/// Next is detailed/verbose documentation.
+///
+/// Code blocks have implicit `fn main()` and `extern crate <cratename>`,
+/// allowing them to run as unit tests or on demand by developers when
+/// part of a lib crate.
+///
+/// The `no_run` flag will prevent code from running as a test, and you
+/// can allow panics with `should_panic`.
+///
+/// ```
+/// # // hidden lines start with `#` symbol, but they're still compiled!
+/// let result = crate::add(2, 3);
+/// assert_eq!(result, 5);
+/// ```
+```
+
+For a more complete overview [see the docs](https://doc.rust-lang.org/stable/rust-by-example/testing/doc_testing.html).
+
+
+## Tests
+
+### Units Tests
+
+Unit tests are located alongside the code being tested, within the same module scope, generally in the same file. They can also be located in the DocBlock for a function.
+
+### Integration Tests
+
+Integration tests are located in the `package/tests/` directory next to `package/src/`. They import our compiled libraries and test the public-facing contents (often in combination).
+
+
+## Linting
+
+The Rust compilation will perform some default linting (warnings about unused code, etc), but we use `cargo clippy` for additional linting on file save. Any modifications to the linting rules are declared inside the crate entry-point file (e.g. `lib.rs`).
