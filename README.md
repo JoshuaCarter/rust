@@ -22,13 +22,17 @@ These steps assume you are using VSCode.
     - `rust-analyzer.checkOnSave.command` = `clippy` for additional linting.
 - Generate your `launch.json` (the debugger extension will do this out-of-the-box).
 
-## Cargo Commands
+## Cargo
 
-- `cargo build` Compile the current package.
-- `cargo check` Analyze the current package and report errors.
-- `cargo clippy` Perform `cargo check` with additional linting.
-- `cargo run` Run a binary or example of the local package.
-- `cargo test` Run the tests.
+Cargo is the official rust package manager (think npm, composer, etc), but it also helps with local development by making it easy to perform common operations in our rust workspace.
+
+### Useful Commands
+
+- `cargo build` Compile the packages in this workspace.
+- `cargo check` Analyze the packages in this workspace.
+- `cargo clippy` Does `cargo check` with additional linting.
+- `cargo run` Run a binary or example.
+- `cargo test` Run the tests for packages in this workspace.
 
 ## Project Anatomy
 
@@ -72,7 +76,7 @@ These steps assume you are using VSCode.
 └── target/                         # Compilation output
 ```
 
-## Modules
+### Modules
 
 A module can take two basic forms:
 
@@ -94,7 +98,7 @@ A module can take two basic forms:
     - **Avoid** re-exporting definitions from descendent modules.
 
 
-### Documentation
+## Documentation
 
 DocBlocks are denoted by `///` and use markdown formatting.
 
