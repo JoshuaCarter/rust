@@ -68,13 +68,13 @@ Cargo is the official rust package manager (think npm, composer, etc), but it al
 |   └── tests/                      # Integration tests
 |       └── my_test.rs              # Test module
 ├── my_bin/                         # Package root
-|   ├── Cargo.toml                  # Package config (think package.json)
+|   ├── Cargo.toml                  # Package config (has my_lib dependency)
 |   ├── src/                        # Crates source
 |   │   ├── main.rs                 # Bin crate entry point
 |   |   └── my_module.rs            # Module
 |   └── tests/                      # Integration tests
 |       └── my_test.rs              # Test module
-└── target/                         # Compilation output
+└── target/                         # Shared compilation output
 ```
 
 ### Modules

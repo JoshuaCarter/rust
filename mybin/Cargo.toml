@@ -6,7 +6,8 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
-mylib = { path = "../mylib", version = "0.1.0" }
-rand = "0.8.5"
+mylib = { path = "../mylib", version = "*" }
+rand = "0.8.*"
+futures = "0.3.*"
 
 [dev-dependencies]

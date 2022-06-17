@@ -4,8 +4,8 @@ use mylib::{
     render::*,
     math2d::utils::hello_world::hello_world,
 };
-
-use std::{thread, ops::Add};
+use futures::executor::block_on;
+use std::{thread, ops::Add, str::FromStr};
 
 // macro example
 macro_rules! join {
@@ -58,6 +58,14 @@ fn print_os() {
     else {
         println!("Youre OS is unknown!");
     }
+}
+
+async fn async_nested() {
+    println!("async nested");
+}
+async fn async_main(print_me: String) {
+    async_nested().await; // doesn't block main thread
+    println!("async {}", print_me);
 }
 
 fn main() {
@@ -114,4 +122,9 @@ fn main() {
     //     let _ = t.join();
     // }
     join!(threads);
+
+    // async/await
+    let txt = String::from_str("yoyo").unwrap();
+    let promise = async_main(txt);
+    block_on(promise); // blocks current thread
 }
