@@ -6,9 +6,10 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
-rand = "0.8.*"          # random number lib
-serde = "1.0.*"         # de/serialisation lib
-clap = "3.2.*"          # cli lib
-futures = "0.3.*"       # async lib
+clap =  { version = "3.2.*", features = ["derive"] }    # cli lib
+rand = "0.8.*"                                          # random number lib
+serde = "1.0.*"                                         # de/serialisation lib
+futures = "0.3.*"                                       # async lib
+simple-error = "0.2.*"                                  # simple string error lib
 
 [dev-dependencies]

@@ -3,7 +3,7 @@
 #![allow(clippy::needless_return)]
 #![allow(clippy::module_inception)]
 
-pub mod math2d;
-pub use math2d::*;
-pub mod render;
-pub use render::*;
+extern crate simple_error;
+
+pub mod cli;
+pub mod model;
