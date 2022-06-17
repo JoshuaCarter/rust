@@ -55,19 +55,20 @@ Cargo is the official rust package manager (think npm, composer, etc), but it al
 
 ```
 .                                   # Workspace root
-├── Cargo.toml                      # Workspace config
+├── Cargo.toml                      # Workspace config (defines sub-packages, etc)
+├── Cargo.lock                      # Workspace lock (think shared package.lock)
 ├── my_lib/                         # Package root
-|   ├── Cargo.toml                  # Package config (similar to package.json)
+|   ├── Cargo.toml                  # Package config (think package.json)
 |   ├── src/                        # Crates source
 |   │   ├── lib.rs                  # Lib crate entry point
 |   │   └── my_module/              # Module
-|   │       ├── mod.rs              # Module entry point (similar to index.ts)
+|   │       ├── mod.rs              # Module entry point (think index.ts)
 |   │       ├── my_module.rs        # Module definitions (instead of in mod.rs)
 |   │       └── my_submodule.rs     # Submodule (re-exported by mod.rs)
 |   └── tests/                      # Integration tests
 |       └── my_test.rs              # Test module
 ├── my_bin/                         # Package root
-|   ├── Cargo.toml                  # Package config (similar to package.json)
+|   ├── Cargo.toml                  # Package config (think package.json)
 |   ├── src/                        # Crates source
 |   │   ├── main.rs                 # Bin crate entry point
 |   |   └── my_module.rs            # Module
