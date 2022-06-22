@@ -6,8 +6,9 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
-mylib = { path = "../mylib", version = "*" }
-rand = "0.8.*"
-futures = "0.3.*"
+mylib = { path = "../mylib", version = "*" }            # our app code
+futures = "0.3"                                         # promises
+tokio = { version = "1", features = ["full"] }          # allows async main
+dotenvy = "0.15.1"                                      # .env file lib
 
 [dev-dependencies]

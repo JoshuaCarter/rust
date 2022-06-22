@@ -8,6 +8,7 @@
 - [Cargo docs](https://doc.rust-lang.org/cargo/getting-started/installation.html)
 - [Cargo.toml docs](https://doc.rust-lang.org/cargo/reference/manifest.html)
 - [Crate registry](https://crates.io/)
+- [Clippy lints](https://rust-lang.github.io/rust-clippy/master/)
 
 ## Installation
 

@@ -1,0 +1,14 @@
+{
+  "name": "test-server",
+  "version": "1.0.0",
+  "description": "Intercepts local web traffic to specified hosts, then logs and returns it.",
+  "dependencies": {
+    "hostile": "1.3.3"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node src/main.js"
+  },
+  "author": "jcarter"
+}

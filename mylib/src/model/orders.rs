@@ -29,7 +29,7 @@ pub enum Side {
 }
 
 #[derive(Debug)]
-pub struct Order {
+pub struct CliCommand {
     exchange: Exchange,
     market: String,
     quantity: String,
@@ -37,15 +37,15 @@ pub struct Order {
     side: Side,
 }
 
-impl Order {
+impl CliCommand {
     pub fn new(
         exchange: Exchange,
         market: &String,
         quantity: &String,
         price: &String,
         side: Side,
-) -> Order {
-        return Order {
+) -> CliCommand {
+        return CliCommand {
             exchange,
             market: market.to_string(),
             quantity: quantity.to_string(),
