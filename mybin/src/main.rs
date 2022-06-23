@@ -1,6 +1,9 @@
 use mylib::{
     cli,
-    utils::time,
+    model::{
+        common::*,
+        trading::*,
+    },
     venues::{
         binance
     },
@@ -11,18 +14,41 @@ async fn main() {
     // load .env
     dotenvy::dotenv().ok();
 
-    let cmd = cli::process_input();
-    println!("{:?}", cmd);
+    let task = cli::process_input();
+    println!("{:?}", task);
 
-    let venue = binance::Binance::new();
+    match task {
+        cli::Task::TradeRequest(task) => {
+            match task {
+                TradeRequest::NewOrderRequest(req) => {
+                    match req.exchange {
+                        Exchange::Binance => {
+                            match binance::Binance::new().request_new_order(req).await {
+                                Ok(res) => { println!("{:?}", res); }
+                                Err(err) => { println!("Error: {:?}", err); }
+                            }
+                        }
+                        _ => { panic!("Unsupported exchange"); }
+                    }
+                }
+                TradeRequest::CxlOrderRequest(req) => {
+                    match req.exchange {
+                        Exchange::Binance => {
+                            match binance::Binance::new().request_cxl_order(req).await {
+                                Ok(res) => { println!("{:?}", res); }
+                                Err(err) => { println!("Error: {:?}", err); }
+                            }
+                        }
+                        _ => { panic!("Unsupported exchange"); }
+                    }
+                }
+            }
+        }
+    }
 
-    let time = venue.request_time().await.unwrap();
-    println!("{:?}", time);
+    // let venue = binance::Binance::new();
+    // let time = venue.request_time().await.unwrap();
+    // println!("{:?}", time);
     // let acc = venue.request_account().await.unwrap();
     // println!("{:?}", acc);
-    let new_order = venue.request_new_order().await.unwrap();
-    println!("{:?}", new_order);
-    time::sleep(1000);
-    let cxl_order = venue.request_cxl_order(new_order.orderId).await.unwrap();
-    println!("{:?}", cxl_order);
 }

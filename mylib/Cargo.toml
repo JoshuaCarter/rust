@@ -12,10 +12,14 @@ serde = { version = "1.0", features = ["derive"] }                              
 serde_json = "1.0"                                                                          # json lib
 futures = "0.3"                                                                             # async lib
 simple-error = "0.2"                                                                        # simple string error lib
+anyhow = "1.0"                                                                              # error handling lib
 reqwest = { version = "0.11", default-features = false, features = ["rustls-tls", "json"] } # http lib
 chrono = "0.4"                                                                              # time lib
 ring = "0.16"                                                                               # crypto lib
 hex = "0.4"                                                                                 # hex lib
-tokio-tungstenite = "0.17.1"                                                                # websock lib
+tokio-tungstenite = "0.17"                                                                  # websock lib
+lazy-regex = "2.3"                                                                          # regex lib
+strum = "0.24"                                                                              # STRing/enUM util lib
+strum_macros = "0.24"                                                                       # STRing/enUM macro lib
 
 [dev-dependencies]

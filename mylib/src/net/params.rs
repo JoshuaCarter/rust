@@ -1,4 +1,5 @@
 pub use std::fmt::Display;
+
 use serde_json::Value;
 use simple_error::SimpleError;
 

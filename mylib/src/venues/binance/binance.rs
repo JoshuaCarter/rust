@@ -2,7 +2,11 @@
 
 use crate::utils::time;
 use crate::net::Params;
+use crate::model::common::*;
+use crate::model::trading;
 use super::api::*;
+use anyhow::Context;
+use anyhow::Result;
 use reqwest::{Client, RequestBuilder};
 use ring::hmac;
 
@@ -22,57 +26,63 @@ impl Binance {
         };
     }
 
-    pub async fn request_time(&self) -> Result<types::TimeResponse, reqwest::Error> {
-        let req = self.http.get(endpoints::TIME);
-        let res_json = req.send().await?.text().await?;
-        println!("RES = {}", res_json);
-        let res = serde_json::from_str::<types::TimeResponse>(res_json.as_str()).unwrap();
+    // pub async fn request_time(&self) -> Result<types::TimeResponse> {
+    //     let req = self.http.get(endpoints::TIME);
+    //     let res_json = req.send().await?.text().await?;
+    //     let res = serde_json::from_str::<types::TimeResponse>(res_json.as_str())?;
 
-        return Ok(res);
-    }
+    //     return Ok(res);
+    // }
 
-    pub async fn request_account(&self) -> Result<String, reqwest::Error> {
-        let mut params = Params::from(vec![]);
+    // pub async fn request_account(&self) -> Result<String> {
+    //     let mut params = Params::from(vec![]);
 
-        let req = self.sign_request(self.http.get(endpoints::ACCOUNT), &mut params);
-        let res = req.send().await?;
-        let res_json = res.text().await?;
+    //     let req = self.sign_request(self.http.get(endpoints::ACCOUNT), &mut params);
+    //     let res = req.send().await?;
+    //     let res_json = res.text().await?;
 
-        return Ok(res_json);
-    }
+    //     return Ok(res_json);
+    // }
 
-    pub async fn request_new_order(&self) -> Result<types::NewOrderResponse, reqwest::Error> {
+    pub async fn request_new_order(&self, order: trading::NewOrderRequest) -> Result<types::NewOrderResponse> {
         let body = types::NewOrderRequest {
-            symbol: String::from("ETHUSDT"),
-            type_: String::from("LIMIT"),
-            side: String::from("BUY"),
-            timeInForce: String::from("GTC"),
-            price: 250.0,
-            quantity: 0.04,
+            symbol: order.symbol.to_string_without_delim(),
+            type_: order.type_.to_string().to_uppercase(),
+            side: order.side.to_buy_sell_string().to_uppercase(),
+            timeInForce: order.time_in_force.to_string(),
+            price: order.price,
+            quantity: order.quantity,
         };
 
         let mut params = Params::from(&serde_json::json!(body));
         let req = self.sign_request(self.http.post(endpoints::ORDER), &mut params);
         let res = req.send().await?;
         let txt = res.text().await?;
-        let order = serde_json::from_str::<types::NewOrderResponse>(txt.as_str()).unwrap();
+
+        // TODO: check res status and err 'code'
+        let order = serde_json::from_str::<types::NewOrderResponse>(txt.as_str())
+            .with_context(|| "Failed to decode response new order response")?;
 
         return Ok(order);
     }
 
-    pub async fn request_cxl_order(&self, id: u64) -> Result<types::CxlOrderResponse, reqwest::Error> {
+    pub async fn request_cxl_order(&self, order: trading::CxlOrderRequest) -> Result<types::CxlOrderResponse> {
         let body = types::CxlOrderRequest {
-            symbol: String::from("ETHUSDT"),
-            orderId: id,
+            symbol: order.symbol.to_string_without_delim(),
+            orderId: u64::from_str(order.order_id.as_str())?,
         };
 
         let mut params = Params::from(&serde_json::json!(body));
         let req = self.sign_request(self.http.delete(endpoints::ORDER), &mut params);
         let res = req.send().await?;
         let txt = res.text().await?;
-        let order = serde_json::from_str::<types::CxlOrderResponse>(txt.as_str());
 
-        return Ok(order.unwrap());
+        // TODO: check res status and err 'code'
+
+        let order = serde_json::from_str::<types::CxlOrderResponse>(txt.as_str())
+            .with_context(|| "Failed to decode response new order response")?;
+
+        return Ok(order);
     }
 
     fn sign_request(&self, request: RequestBuilder, params: &mut Params) -> RequestBuilder {
