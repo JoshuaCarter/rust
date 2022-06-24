@@ -3,10 +3,10 @@
 use crate::utils::time;
 use crate::net::Params;
 use crate::model::common::*;
-use crate::model::trading;
-use super::api::*;
-use anyhow::Context;
-use anyhow::Result;
+use crate::model::trading::*;
+use super::api;
+use anyhow::*;
+use async_trait::async_trait;
 use reqwest::{Client, RequestBuilder};
 use ring::hmac;
 
@@ -44,47 +44,6 @@ impl Binance {
     //     return Ok(res_json);
     // }
 
-    pub async fn request_new_order(&self, order: trading::NewOrderRequest) -> Result<types::NewOrderResponse> {
-        let body = types::NewOrderRequest {
-            symbol: order.symbol.to_string_without_delim(),
-            type_: order.type_.to_string().to_uppercase(),
-            side: order.side.to_buy_sell_string().to_uppercase(),
-            timeInForce: order.time_in_force.to_string(),
-            price: order.price,
-            quantity: order.quantity,
-        };
-
-        let mut params = Params::from(&serde_json::json!(body));
-        let req = self.sign_request(self.http.post(endpoints::ORDER), &mut params);
-        let res = req.send().await?;
-        let txt = res.text().await?;
-
-        // TODO: check res status and err 'code'
-        let order = serde_json::from_str::<types::NewOrderResponse>(txt.as_str())
-            .with_context(|| "Failed to decode response new order response")?;
-
-        return Ok(order);
-    }
-
-    pub async fn request_cxl_order(&self, order: trading::CxlOrderRequest) -> Result<types::CxlOrderResponse> {
-        let body = types::CxlOrderRequest {
-            symbol: order.symbol.to_string_without_delim(),
-            orderId: u64::from_str(order.order_id.as_str())?,
-        };
-
-        let mut params = Params::from(&serde_json::json!(body));
-        let req = self.sign_request(self.http.delete(endpoints::ORDER), &mut params);
-        let res = req.send().await?;
-        let txt = res.text().await?;
-
-        // TODO: check res status and err 'code'
-
-        let order = serde_json::from_str::<types::CxlOrderResponse>(txt.as_str())
-            .with_context(|| "Failed to decode response new order response")?;
-
-        return Ok(order);
-    }
-
     fn sign_request(&self, request: RequestBuilder, params: &mut Params) -> RequestBuilder {
         params.insert("timestamp", time::now_ms().to_string().as_str());
 
@@ -97,4 +56,91 @@ impl Binance {
             .header("X-MBX-APIKEY", self.key.as_str())
             .query(params.for_query());
     }
+}
+
+#[async_trait]
+impl TradeHandler for Binance {
+    async fn new_order_request(&self, req: NewOrderRequest) -> Result<NewOrderResponse> {
+        let api_req = api::HttpNewRequest {
+            symbol: req.symbol.to_string_without_delim(),
+            type_: req.type_.to_string().to_uppercase(),
+            side: req.side.to_buy_sell_string().to_uppercase(),
+            timeInForce: req.time_in_force.to_string(),
+            price: req.price,
+            quantity: req.quantity,
+        };
+        let mut api_params = Params::from(&serde_json::json!(api_req));
+
+        let http_req = self.sign_request(self.http.post(api::endpoints::ORDER), &mut api_params);
+        let http_res = http_req.send().await?;
+        let http_txt = http_res.text().await?;
+
+        // TODO: check res status and err 'code'
+
+        let api_res = serde_json::from_str::<api::HttpNewResponse>(http_txt.as_str())
+            .with_context(|| format!("Failed to decode response {:?}", http_txt))?;
+
+        let res = NewOrderResponse {
+            exchange: req.exchange,
+            side: req.side,
+            symbol: req.symbol,
+            type_: req.type_,
+            time_in_force: req.time_in_force,
+            order_id: api_res.orderId.to_string(),
+            status: adapt_status(api_res.status)?,
+            price: api_res.price.parse::<f64>()?,
+            quantity: api_res.origQty.parse::<f64>()?,
+            executed: api_res.executedQty.parse::<f64>()?,
+            fills: adapt_fills(api_res.fills)?,
+        };
+
+        return Ok(res);
+    }
+
+    async fn cxl_order_request(&self, req: CxlOrderRequest) -> Result<CxlOrderResponse> {
+        let api_req = api::HttpCxlRequest {
+            symbol: req.symbol.to_string_without_delim(),
+            orderId: u64::from_str(req.order_id.as_str())?,
+        };
+        let mut api_params = Params::from(&serde_json::json!(api_req));
+
+        let http_req = self.sign_request(self.http.delete(api::endpoints::ORDER), &mut api_params);
+        let http_res = http_req.send().await?;
+        let http_txt = http_res.text().await?;
+
+        // TODO: check res status and err 'code'
+
+        let api_res = serde_json::from_str::<api::HttpCxlResponse>(http_txt.as_str())
+            .with_context(|| format!("Failed to decode response {:?}", http_txt))?;
+
+        let res = CxlOrderResponse {
+            exchange: req.exchange,
+            symbol: req.symbol,
+            order_id: api_res.orderId.to_string(),
+            status: adapt_status(api_res.status)?,
+        };
+
+        return Ok(res);
+    }
+}
+
+fn adapt_status(status: String) -> Result<Status> {
+    match status.as_str() {
+        "NEW" | "PARTIALLY_FILLED" => { return Ok(Status::Open); }
+        "FILLED" |"CANCELED" | "PENDING_CANCEL" | "REJECTED" | "EXPIRED" => { return Ok(Status::Closed); }
+        _ => { return Err(anyhow::anyhow!("Unhandled status '{}'", status)); }
+    }
+}
+
+fn adapt_fills(fills: Vec<api::Fill>) -> Result<Vec<Fill>> {
+    let mut new: Vec<Fill> = Vec::new();
+
+    for f in fills {
+        new.push(Fill {
+            price: f.price.parse::<f64>()?,
+            quantity: f.qty.parse::<f64>()?,
+        });
+    }
+
+    return Ok(new);
 }

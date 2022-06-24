@@ -1,4 +1,14 @@
 use super::common::*;
+use anyhow::Result;
+use async_trait::async_trait;
+
+#[async_trait]
+pub trait TradeHandler {
+    async fn new_order_request(&self, order: NewOrderRequest) -> Result<NewOrderResponse>;
+    async fn cxl_order_request(&self, order: CxlOrderRequest) -> Result<CxlOrderResponse>;
+}
+
+// REQUEST TYPES
 
 #[derive(Debug)]
 pub enum TradeRequest {
@@ -24,9 +34,33 @@ pub struct CxlOrderRequest {
     pub order_id: String,
 }
 
-pub trait TradeRequestHandler {
-    fn new_order_request(&self, order: NewOrderRequest);
-    fn cxl_order_request(&self, order: NewOrderRequest);
+// RESPONSE TYPES
+
+#[derive(Debug)]
+pub enum TradeResponse {
+    NewOrderResponse(NewOrderResponse),
+    CxlOrderResponse(CxlOrderResponse),
 }
 
-// TODO: response types
+#[derive(Debug)]
+pub struct NewOrderResponse {
+    pub order_id: String,
+    pub exchange: Exchange,
+    pub symbol: Symbol,
+    pub status: Status,
+    pub side: Side,
+    pub type_: Type,
+    pub price: f64,
+    pub quantity: f64,
+    pub executed: f64,
+    pub fills: Vec<Fill>,
+    pub time_in_force: TimeInForce,
+}
+
+#[derive(Debug)]
+pub struct CxlOrderResponse {
+    pub exchange: Exchange,
+    pub symbol: Symbol,
+    pub order_id: String,
+    pub status: Status,
+}

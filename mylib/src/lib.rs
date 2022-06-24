@@ -3,8 +3,6 @@
 #![allow(clippy::module_inception)]
 #![allow(clippy::new_without_default)]
 
-extern crate simple_error;
-
 pub mod cli;
 pub mod model;
 pub mod venues;

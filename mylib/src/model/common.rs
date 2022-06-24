@@ -1,7 +1,7 @@
 pub use std::str::FromStr;
 
+use anyhow::*;
 use std::fmt::Display;
-use simple_error::SimpleError;
 use strum_macros::{AsRefStr, EnumString, Display as EDisplay};
 use lazy_regex::regex_captures;
 
@@ -43,6 +43,14 @@ pub enum TimeInForce {
     FOK,
 }
 
+#[derive(Debug, EnumString, AsRefStr, EDisplay)]
+#[strum(ascii_case_insensitive)]
+pub enum Status {
+    Pending,
+    Open,
+    Closed,
+}
+
 #[derive(Debug)]
 pub struct Symbol {
     base: String,
@@ -65,7 +73,7 @@ impl Display for Symbol {
 }
 
 impl FromStr for Symbol {
-    type Err = SimpleError;
+    type Err = Error;
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
         match regex_captures!(r#"([a-z0-9]+)([^a-z0-9]{1})([a-z0-9]+)"#i, s) {
@@ -77,10 +85,20 @@ impl FromStr for Symbol {
                 });
             }
             None => {
-                return Err(SimpleError::new(
-                    format!("Symbol '{}' doesn't have 3 parts {{base}}{{delim}}{{quote}}, e.g. ETH/BTC", s)
-                ));
+                return Err(anyhow!("Symbol '{}' doesn't have 3 parts {{base}}{{delim}}{{quote}}, e.g. ETH/BTC", s));
             }
         }
+    }
+}
+
+#[derive(Debug)]
+pub struct Fill {
+    pub price: f64,
+    pub quantity: f64,
+}
+
+impl Display for Fill {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        return f.write_fmt(format_args!("({} @ {})", self.quantity, self.price));
     }
 }

@@ -1,7 +1,7 @@
 pub use std::fmt::Display;
 
 use serde_json::Value;
-use simple_error::SimpleError;
+use anyhow::*;
 
 type Pairs = Vec<(String, String)>;
 
@@ -57,7 +57,7 @@ impl Params {
     }
 }
 
-fn json_to_vec(json: &Value) -> Result<Pairs, SimpleError> {
+fn json_to_vec(json: &Value) -> Result<Pairs, Error> {
     let mut params: Pairs = Vec::new();
 
     match json {
@@ -68,17 +68,17 @@ fn json_to_vec(json: &Value) -> Result<Pairs, SimpleError> {
                     Value::Bool(x) => params.push((key.to_string(), x.to_string())),
                     Value::Number(ref x) => params.push((key.to_string(), x.to_string())),
                     Value::String(ref x) => params.push((key.to_string(), x.to_string())),
-                    _ => return Err(SimpleError::new("Value type not supported")),
+                    _ => return Err(anyhow!("Value type not supported")),
                 }
             }
         },
-        _ => return Err(SimpleError::new("Expected Map<String,Value> at JSON root")),
+        _ => return Err(anyhow!("Expected Map<String,Value> at JSON root")),
     }
 
     return Ok(params);
 }
 
-fn vec_to_str(params: &Pairs) -> Result<String, SimpleError> {
+fn vec_to_str(params: &Pairs) -> Result<String, Error> {
     let mut string: String = String::new();
 
     for (key, val) in params {
@@ -89,7 +89,7 @@ fn vec_to_str(params: &Pairs) -> Result<String, SimpleError> {
     return Ok(string);
 }
 
-fn str_to_vec(string: &str) -> Result<Pairs, SimpleError> {
+fn str_to_vec(string: &str) -> Result<Pairs, Error> {
     let mut params: Pairs = Vec::new();
 
     for pair in string.split('&') {

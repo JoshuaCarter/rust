@@ -157,15 +157,21 @@ The Rust compilation will perform some default linting (warnings about unused co
 Files should follow this basic layout:
 
 ```rust
+// lint rules
+#![allow(non_snake_case)]
+
 // pub use/mod
 pub mod my_public_module;
 pub use std::fmt::Display;
+
 // use/mod
 mod my_private_module;
 use serde_json::Value;
+
 // types
 type Foo = Vec<(Value, Value)>;
 type Bar = Vec<(String, String)>;
+
 // definitions
 enum FooBar { Foo, Bar }
 impl Display for FooBar { /*...*/ }
