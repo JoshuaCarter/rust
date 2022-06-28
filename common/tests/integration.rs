@@ -1,6 +1,6 @@
 #[cfg(test)]
 mod integration {
-    use mylib::*;
+    use common::*;
 
     #[test]
     fn empty_test() {

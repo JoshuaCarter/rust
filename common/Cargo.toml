@@ -1,7 +1,7 @@
 # https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [package]
-name = "mylib"
+name = "common"
 version = "0.1.0"
 edition = "2021"
 
@@ -21,5 +21,4 @@ tokio-tungstenite = "0.17"                                                      
 lazy-regex = "2.3"                                                                          # regex lib
 strum = "0.24"                                                                              # STRing/enUM util lib
 strum_macros = "0.24"                                                                       # STRing/enUM macro lib
-
-[dev-dependencies]
+tonic = "0.7"                                                                               # grpc lib

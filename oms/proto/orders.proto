@@ -1,0 +1,23 @@
+syntax = "proto3";
+package orders;
+
+service Orders {
+    rpc new_order (NewRequest) returns (NewReply);
+    rpc cxl_order (CxlRequest) returns (CxlReply);
+}
+
+message NewRequest {
+    string msg = 1;
+}
+
+message NewReply {
+    string msg = 1;
+}
+
+message CxlRequest {
+    string msg = 1;
+}
+
+message CxlReply {
+    string msg = 1;
+}

@@ -14,6 +14,8 @@
 
 Install `rustup` and `cargo` by following [this guide](https://doc.rust-lang.org/cargo/getting-started/installation.html).
 
+Install `protoc` required by the `prost` package by following [this guide](https://github.com/protocolbuffers/protobuf#protocol-compiler-installation)
+
 ### VSCode Setup
 
 **Install these VSCode extensions:**

@@ -1,0 +1,27 @@
+# https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[package]
+name = "oms"
+version = "0.1.0"
+edition = "2021"
+
+[[bin]]
+name = "node"
+path = "src/node.rs"
+
+[[bin]]
+name = "terminal"
+path = "src/terminal.rs"
+
+[dependencies]
+common = { path = "../common", version = "*" }          # our app code
+futures = "0.3"                                         # promises
+tokio = { version = "1", features = ["full"] }          # allows async main
+dotenvy = "0.15.1"                                      # .env file lib
+tonic = "0.7"                                           # grpc lib
+prost = "0.10"                                          # proto lib
+anyhow = "1.0"                                          # error agnositc result lib
+url = "2.2"                                             # url lib
+
+[build-dependencies]
+tonic-build = "0.7"                                     # proto grpc builder lib

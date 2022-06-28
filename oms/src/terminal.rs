@@ -1,4 +1,4 @@
-use mylib::{
+use common::{
     cli,
     model::{
         common::*,
@@ -8,7 +8,7 @@ use mylib::{
 };
 
 #[tokio::main]
-async fn main() {
+async fn main() -> Result<(), Box<dyn std::error::Error>> {
     // load .env
     dotenvy::dotenv().ok();
 
@@ -21,10 +21,10 @@ async fn main() {
                 TradeRequest::NewOrderRequest(req) => {
                     match req.exchange {
                         Exchange::Binance => {
-                            match binance::Binance::new().new_order_request(req).await {
-                                Ok(res) => { println!("{:#?}", res); }
-                                Err(err) => { println!("Error: {:?}", err); }
-                            }
+                            // match binance::Binance::new().new_order_request(req).await {
+                            //     Ok(res) => { println!("{:#?}", res); }
+                            //     Err(err) => { println!("Error: {:?}", err); }
+                            // }
                         }
                         _ => { panic!("Unsupported exchange"); }
                     }
@@ -32,10 +32,10 @@ async fn main() {
                 TradeRequest::CxlOrderRequest(req) => {
                     match req.exchange {
                         Exchange::Binance => {
-                            match binance::Binance::new().cxl_order_request(req).await {
-                                Ok(res) => { println!("{:#?}", res); }
-                                Err(err) => { println!("Error: {:?}", err); }
-                            }
+                            // match binance::Binance::new().cxl_order_request(req).await {
+                            //     Ok(res) => { println!("{:#?}", res); }
+                            //     Err(err) => { println!("Error: {:?}", err); }
+                            // }
                         }
                         _ => { panic!("Unsupported exchange"); }
                     }
@@ -43,4 +43,6 @@ async fn main() {
             }
         }
     }
+
+    Ok(())
 }
