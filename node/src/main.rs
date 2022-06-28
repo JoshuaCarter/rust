@@ -1,4 +1,6 @@
-mod grpc;
+#![allow(clippy::needless_return)]
+#![allow(clippy::module_inception)]
+#![allow(clippy::new_without_default)]
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
@@ -7,5 +9,5 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     grpc::start_server("[::]:50051").await?;
 
-    Ok(())
+    return Ok(());
 }

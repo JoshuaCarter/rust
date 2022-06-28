@@ -1,11 +1,15 @@
-use common::{
-    cli,
+#![allow(clippy::needless_return)]
+#![allow(clippy::module_inception)]
+#![allow(clippy::new_without_default)]
+
+use infra::{
     model::{
         common::*,
         trading::*,
     },
-    venues::*,
 };
+
+mod cli;
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
@@ -44,5 +48,5 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         }
     }
 
-    Ok(())
+    return Ok(());
 }

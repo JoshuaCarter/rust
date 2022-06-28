@@ -1,7 +1,13 @@
+#![allow(clippy::needless_return)]
+#![allow(clippy::module_inception)]
+#![allow(clippy::new_without_default)]
+
+pub mod services;
+
 use anyhow::Result;
 use std::{net::SocketAddr, str::FromStr};
 use tonic::transport::{Server, Endpoint};
-use super::services::*;
+use services::*;
 
 pub async fn start_server(uri: &str) -> Result<()> {
     let addy = SocketAddr::from_str(uri)?;
@@ -11,7 +17,7 @@ pub async fn start_server(uri: &str) -> Result<()> {
         .serve(addy)
         .await?;
 
-    Ok(())
+    return Ok(());
 }
 
 pub async fn start_client(uri: &str) -> Result<()> {
@@ -20,5 +26,5 @@ pub async fn start_client(uri: &str) -> Result<()> {
 
     let orders = OrdersGrpc::get_client(channel);
 
-    Ok(())
+    return Ok(());
 }

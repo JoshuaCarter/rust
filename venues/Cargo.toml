@@ -1,13 +1,12 @@
 # https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [package]
-name = "common"
+name = "venues"
 version = "0.1.0"
 edition = "2021"
 
 [dependencies]
-clap =  { version = "3.2", features = ["derive"] }                                          # cli lib
-rand = "0.8"                                                                                # random number lib
+infra = { path = "../infra", version = "*" }                                                # our infra lib
 serde = { version = "1.0", features = ["derive"] }                                          # de/serialisation lib
 serde_json = "1.0"                                                                          # json lib
 futures = "0.3"                                                                             # async lib

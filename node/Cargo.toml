@@ -1,0 +1,15 @@
+# https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[package]
+name = "node"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+infra = { path = "../infra", version = "*" }            # our infra lib
+venues = { path = "../venues", version = "*" }          # our venues lib
+grpc = { path = "../grpc", version = "*" }              # our grpc lib
+futures = "0.3"                                         # promises
+tokio = { version = "1", features = ["full"] }          # allows async main
+dotenvy = "0.15.1"                                      # .env file lib
+anyhow = "1.0"                                          # error agnositc result lib

@@ -20,10 +20,10 @@ impl super::Service for OrdersGrpc {
     type Client = OrdersClient<Channel>;
 
     fn get_server() -> Self::Server {
-        OrdersServer::new(OrdersGrpc::default())
+        return OrdersServer::new(OrdersGrpc::default());
     }
     fn get_client(channel: Channel) -> Self::Client {
-        OrdersClient::new(channel)
+        return OrdersClient::new(channel);
     }
 }
 
@@ -36,7 +36,7 @@ impl Orders for OrdersGrpc {
             msg: format!("NEW ORDER {}!", request.into_inner().msg),
         };
 
-        Ok(Response::new(reply))
+        return Ok(Response::new(reply));
     }
     async fn cxl_order(&self, request: Request<CxlRequest>) -> Result<Response<CxlReply>, Status> {
         println!("Got a request: {:?}", request);
@@ -45,6 +45,6 @@ impl Orders for OrdersGrpc {
             msg: format!("CXL ORDER {}!", request.into_inner().msg),
         };
 
-        Ok(Response::new(reply))
+        return Ok(Response::new(reply));
     }
 }

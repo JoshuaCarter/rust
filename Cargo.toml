@@ -1,4 +1,4 @@
 # https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [workspace]
-members = ["oms", "common"]
+members = ["node", "terminal", "grpc", "infra", "venues"]

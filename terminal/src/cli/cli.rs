@@ -1,8 +1,8 @@
 pub use clap::Parser;
 
 use clap::{Command, arg, ArgMatches, App};
-use crate::model::common::*;
-use crate::model::trading;
+use infra::model::common::*;
+use infra::model::trading;
 
 #[derive(Debug)]
 pub enum Task {

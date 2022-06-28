@@ -1,4 +1,4 @@
-pub mod api;
 pub use binance::*;
 
+mod api;
 mod binance;
