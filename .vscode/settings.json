@@ -5,4 +5,9 @@
 		"tokio",
 		"tokio-macros"
 	],
+	"protoc": {
+		"options": [
+			"--proto_path=${workspaceRoot}/proto_types/proto_files",
+		]
+	},
 }

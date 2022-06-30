@@ -1,17 +1,13 @@
 # https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [package]
-name = "grpc"
+name = "proto_types"
 version = "0.1.0"
 edition = "2021"
 
 [dependencies]
-futures = "0.3"                                         # promises
-tokio = { version = "1", features = ["full"] }          # allows async main
-dotenvy = "0.15.1"                                      # .env file lib
 tonic = "0.7"                                           # grpc lib
 prost = "0.10"                                          # proto lib
-anyhow = "1.0"                                          # error agnositc result lib
 
 [build-dependencies]
 tonic-build = "0.7"                                     # proto grpc builder lib

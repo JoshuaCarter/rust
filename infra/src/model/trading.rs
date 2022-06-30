@@ -11,17 +11,11 @@ pub trait TradeHandler {
 // REQUEST TYPES
 
 #[derive(Debug)]
-pub enum TradeRequest {
-    NewOrderRequest(NewOrderRequest),
-    CxlOrderRequest(CxlOrderRequest),
-}
-
-#[derive(Debug)]
 pub struct NewOrderRequest {
     pub exchange: Exchange,
     pub symbol: Symbol,
     pub side: Side,
-    pub type_: Type,
+    pub r#type: Type,
     pub quantity: f64,
     pub price: f64,
     pub time_in_force: TimeInForce,
@@ -37,19 +31,13 @@ pub struct CxlOrderRequest {
 // RESPONSE TYPES
 
 #[derive(Debug)]
-pub enum TradeResponse {
-    NewOrderResponse(NewOrderResponse),
-    CxlOrderResponse(CxlOrderResponse),
-}
-
-#[derive(Debug)]
 pub struct NewOrderResponse {
     pub order_id: String,
     pub exchange: Exchange,
     pub symbol: Symbol,
     pub status: Status,
     pub side: Side,
-    pub type_: Type,
+    pub r#type: Type,
     pub price: f64,
     pub quantity: f64,
     pub executed: f64,

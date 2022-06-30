@@ -15,7 +15,9 @@ pub enum Exchange {
 #[derive(Debug, EnumString, AsRefStr, EDisplay)]
 #[strum(ascii_case_insensitive)]
 pub enum Side {
+    #[strum(serialize = "ask", serialize = "sell")]
     Ask,
+    #[strum(serialize = "bid", serialize = "buy")]
     Bid
 }
 
@@ -77,8 +79,7 @@ impl FromStr for Symbol {
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
         match regex_captures!(r#"([a-z0-9]+)([^a-z0-9]{1})([a-z0-9]+)"#i, s) {
-            Some((_, base, delim, quote)) => {
-                println!("STR {}, BASE {}, DELIM {}, QUOTE {}", s, base, delim, quote);
+            Some((_, base, _delim, quote)) => {
                 return Ok(Symbol {
                     base: base.to_uppercase(),
                     quote: quote.to_uppercase(),

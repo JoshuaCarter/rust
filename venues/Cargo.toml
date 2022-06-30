@@ -8,6 +8,7 @@ edition = "2021"
 [dependencies]
 infra = { path = "../infra", version = "*" }                                                # our infra lib
 serde = { version = "1.0", features = ["derive"] }                                          # de/serialisation lib
+proto_types = { version = "*", path = "../proto_types"}                                     # our grpc lib
 serde_json = "1.0"                                                                          # json lib
 futures = "0.3"                                                                             # async lib
 async-trait = "0.1"                                                                         # async traits

@@ -436,19 +436,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "grpc"
-version = "0.1.0"
-dependencies = [
- "anyhow",
- "dotenvy",
- "futures",
- "prost",
- "tokio",
- "tonic",
- "tonic-build",
-]
-
-[[package]]
 name = "h2"
 version = "0.3.13"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -614,6 +601,7 @@ dependencies = [
  "futures",
  "hex",
  "lazy-regex",
+ "proto_types",
  "reqwest",
  "ring",
  "serde",
@@ -766,9 +754,10 @@ dependencies = [
  "anyhow",
  "dotenvy",
  "futures",
- "grpc",
  "infra",
+ "proto_types",
  "tokio",
+ "tonic",
  "venues",
 ]
 
@@ -986,6 +975,15 @@ checksum = "2d0a014229361011dc8e69c8a1ec6c2e8d0f2af7c91e3ea3f5b2170298461e68"
 dependencies = [
  "bytes",
  "prost",
+]
+
+[[package]]
+name = "proto_types"
+version = "0.1.0"
+dependencies = [
+ "prost",
+ "tonic",
+ "tonic-build",
 ]
 
 [[package]]
@@ -1340,9 +1338,11 @@ dependencies = [
  "clap",
  "dotenvy",
  "futures",
- "grpc",
  "infra",
+ "proto_types",
  "tokio",
+ "tonic",
+ "venues",
 ]
 
 [[package]]
@@ -1712,6 +1712,7 @@ dependencies = [
  "hex",
  "infra",
  "lazy-regex",
+ "proto_types",
  "reqwest",
  "ring",
  "serde",

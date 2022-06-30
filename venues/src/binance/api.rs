@@ -26,8 +26,8 @@ pub struct Fill {
 pub struct HttpNewRequest {
     pub symbol: String,
     pub side: String,
-    #[serde(rename = "type")]
-    pub type_: String,
+    // #[serde(rename = "type")]
+    pub r#type: String,
     pub quantity: f64,
     pub price: f64,
     pub timeInForce: String,
@@ -52,8 +52,8 @@ pub struct HttpNewResponse {
     pub cummulativeQuoteQty: String,
     pub status: String,
     pub timeInForce: String,
-    #[serde(rename = "type")]
-    pub type_: String,
+    // #[serde(rename = "type")]
+    pub r#type: String,
     pub side: String,
     pub fills: Vec<Fill>,
 }
@@ -68,8 +68,8 @@ pub struct HttpCxlResponse {
     pub cummulativeQuoteQty: String,
     pub status: String,
     pub timeInForce: String,
-    #[serde(rename = "type")]
-    pub type_: String,
+    // #[serde(rename = "type")]
+    pub r#type: String,
     pub side: String,
 }
 

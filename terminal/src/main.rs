@@ -2,47 +2,31 @@
 #![allow(clippy::module_inception)]
 #![allow(clippy::new_without_default)]
 
-use infra::{
-    model::{
-        common::*,
-        trading::*,
-    },
-};
+use anyhow::Result;
 
 mod cli;
+mod grpc;
 
 #[tokio::main]
-async fn main() -> Result<(), Box<dyn std::error::Error>> {
+async fn main() -> Result<()> {
     // load .env
     dotenvy::dotenv().ok();
 
-    let task = cli::process_input();
-    println!("{:?}", task);
+    let task = cli::process_input()?;
+    println!("{:#?}", task);
+
+    let mut grpc_client = grpc::start_client("http://[::]:50051").await?;
 
     match task {
-        cli::Task::TradeRequest(task) => {
-            match task {
-                TradeRequest::NewOrderRequest(req) => {
-                    match req.exchange {
-                        Exchange::Binance => {
-                            // match binance::Binance::new().new_order_request(req).await {
-                            //     Ok(res) => { println!("{:#?}", res); }
-                            //     Err(err) => { println!("Error: {:?}", err); }
-                            // }
-                        }
-                        _ => { panic!("Unsupported exchange"); }
-                    }
+        cli::Task::TradeRequest(trade) => {
+            match trade {
+                cli::TradeRequest::NewOrder(req) => {
+                    let res = grpc_client.trading.new_order(req).await?;
+                    println!("{:#?}", res);
                 }
-                TradeRequest::CxlOrderRequest(req) => {
-                    match req.exchange {
-                        Exchange::Binance => {
-                            // match binance::Binance::new().cxl_order_request(req).await {
-                            //     Ok(res) => { println!("{:#?}", res); }
-                            //     Err(err) => { println!("Error: {:?}", err); }
-                            // }
-                        }
-                        _ => { panic!("Unsupported exchange"); }
-                    }
+                cli::TradeRequest::CxlOrder(req) => {
+                    let res = grpc_client.trading.cxl_order(req).await?;
+                    println!("{:#?}", res);
                 }
             }
         }
