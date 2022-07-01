@@ -76,12 +76,10 @@ impl TradingVenue for Binance {
         let http_req = self.sign_request(self.http.post(api::endpoints::ORDER), &mut api_params);
         let http_res = http_req.send().await?;
         let http_txt = http_res.text().await?;
-        println!("1 {:#?}", http_txt);
 
         // TODO: check res status and err 'code'
 
         let api_res = serde_json::from_str::<api::HttpNewResponse>(http_txt.as_str())?;
-        println!("2 {:#?}", api_res);
 
         let res = NewOrderResponse {
             order_id: api_res.orderId.to_string(),
@@ -96,7 +94,6 @@ impl TradingVenue for Binance {
             executed: api_res.executedQty.parse::<f64>()?,
             fills: adapt_fills(api_res.fills)?,
         };
-        println!("3 {:#?}", res);
 
         return Ok(res);
     }
@@ -111,12 +108,10 @@ impl TradingVenue for Binance {
         let http_req = self.sign_request(self.http.delete(api::endpoints::ORDER), &mut api_params);
         let http_res = http_req.send().await?;
         let http_txt = http_res.text().await?;
-        println!("1 {:#?}", http_txt);
 
         // TODO: check res status and err 'code'
 
         let api_res = serde_json::from_str::<api::HttpCxlResponse>(http_txt.as_str())?;
-        println!("2 {:#?}", api_res);
 
         let res = CxlOrderResponse {
             order_id: api_res.orderId.to_string(),
@@ -124,7 +119,6 @@ impl TradingVenue for Binance {
             symbol: req.symbol,
             status: adapt_status(api_res.status)?,
         };
-        println!("3 {:#?}", res);
 
         return Ok(res);
     }

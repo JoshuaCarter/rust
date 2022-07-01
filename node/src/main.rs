@@ -10,7 +10,8 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     // load .env
     dotenvy::dotenv().ok();
 
-    grpc::start_server("[::]:50051").await?;
+    let uri = std::env::var("ENV_NODE_URI").unwrap();
+    grpc::start_server(uri.as_str()).await?;
 
     return Ok(());
 }
