@@ -7,8 +7,6 @@ edition = "2021"
 
 [dependencies]
 infra = { path = "../infra", version = "*" }                # our infra lib
-proto_types = { path = "../proto_types", version = "*" }    # our grpc lib
-venues = { path = "../venues", version = "*" }              # our infra lib
 tonic = "0.7"                                               # grpc lib
 futures = "0.3"                                             # promises
 tokio = { version = "1", features = ["full"] }              # allows async main

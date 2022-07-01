@@ -30,7 +30,7 @@ Install `protoc` required by the `prost` package by following [this guide](https
 | --- | --- |
 | `"rust-analyzer.checkOnSave.command": "clippy"` | Additional linting |
 | `"rust-analyzer.cargo.unsetTest": ["core","tokio","tokio-macros"]` | Fix false-positive tokio error |
-| `"protoc": { "options": ["--proto_path=${workspaceRoot}/proto_types/proto_files"] }` | Fix false-positive proto import errors |
+| `"protoc": { "options": ["--proto_path=${workspaceRoot}/infra/proto"] }` | Fix false-positive proto import errors |
 
 **Generate your `launch.json` (see `.vscode/launch.json`).**
 

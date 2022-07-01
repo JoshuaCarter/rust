@@ -6,11 +6,18 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
-infra = { path = "../infra", version = "*" }                # our infra lib
-venues = { path = "../venues", version = "*" }              # our venues lib
-proto_types = { path = "../proto_types", version = "*" }    # our grpc lib
-tonic = "0.7"                                               # grpc lib
-futures = "0.3"                                             # promises
-tokio = { version = "1", features = ["full"] }              # allows async main
-dotenvy = "0.15.1"                                          # .env file lib
-anyhow = "1.0"                                              # error agnositc result lib
+infra = { path = "../infra", version = "*" }                                                # our infra lib
+serde = { version = "1.0", features = ["derive"] }                                          # de/serialisation lib
+serde_json = "1.0"                                                                          # json lib
+tonic = "0.7"                                                                               # grpc lib
+futures = "0.3"                                                                             # promises
+tokio = { version = "1", features = ["full"] }                                              # allows async main
+tokio-tungstenite = "0.17"                                                                  # websock lib
+dotenvy = "0.15.1"                                                                          # .env file lib
+anyhow = "1.0"                                                                              # error agnositc result lib
+reqwest = { version = "0.11", default-features = false, features = ["rustls-tls", "json"] } # http lib
+ring = "0.16"                                                                               # crypto lib
+hex = "0.4"                                                                                 # hex lib
+lazy-regex = "2.3"                                                                          # regex lib
+strum = "0.24"                                                                              # STRing/enUM util lib
+strum_macros = "0.24"                                                                       # STRing/enUM macro lib

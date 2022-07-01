@@ -3,6 +3,7 @@
 #![allow(clippy::new_without_default)]
 
 mod grpc;
+mod venues;
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {

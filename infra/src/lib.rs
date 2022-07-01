@@ -5,3 +5,4 @@
 pub mod model;
 pub mod net;
 pub mod utils;
+pub mod error;

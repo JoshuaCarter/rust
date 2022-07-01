@@ -1,7 +1,7 @@
 use std::path::Path;
 use std::error::Error;
 
-const PROTO_DIR: &str = "./proto_files";
+const PROTO_DIR: &str = "./proto";
 const PROTO_EXT: &str = ".proto";
 
 fn main() -> Result<(), Box<dyn Error>> {

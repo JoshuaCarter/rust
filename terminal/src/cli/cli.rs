@@ -1,19 +1,20 @@
+use std::str::FromStr;
 use anyhow::Result;
 use clap::{Command, arg, ArgMatches, App};
 use infra::model::common::*;
-use proto_types::trading as proto;
+use infra::model::trading::*;
 
 pub use clap::Parser;
 
 #[derive(Debug)]
-pub enum TradeRequest {
-    NewOrder(proto::NewRequest),
-    CxlOrder(proto::CxlRequest),
+pub enum Trade {
+    NewOrder(NewOrderCall),
+    CxlOrder(CxlOrderCall),
 }
 
 #[derive(Debug)]
 pub enum Task {
-    TradeRequest(TradeRequest),
+    Trade(Trade),
 }
 
 /// Process command line args into an order object
@@ -50,42 +51,47 @@ fn make_app() -> Box<App<'static>> {
         ));
 }
 
-fn arg_to_str(args: &ArgMatches, name: &str) -> String {
-    return args
+fn arg_parse<T: FromStr>(args: &ArgMatches, name: &str) -> Result<T, anyhow::Error> {
+    let s = args
         .get_one::<String>(name)
         .unwrap()
         .clone();
+
+    match s.parse::<T>() {
+        Ok(x) => Ok(x),
+        Err(_e) => anyhow::bail!("Failed to parse arg '{}'", name),
+    }
 }
 
 fn app_to_task(app: Box<App>) -> Result<Task> {
     match app.get_matches().subcommand() {
         Some(("new", args)) => {
-            let exchange = arg_to_str(args, "EXCHANGE").parse::<Exchange>()?;
-            let symbol = arg_to_str(args, "SYMBOL").parse::<Symbol>()?;
-            let quantity = arg_to_str(args, "QUANTITY").parse::<f64>()?;
-            let price = arg_to_str(args, "PRICE").parse::<f64>()?;
-            let side = arg_to_str(args, "SIDE").parse::<Side>()?;
-            let type_ = Type::Limit;
+            let exchange = arg_parse::<Exchange>(args, "EXCHANGE")?;
+            let symbol = arg_parse::<Symbol>(args, "SYMBOL")?;
+            let quantity = arg_parse::<f64>(args, "QUANTITY")?;
+            let price = arg_parse::<f64>(args, "PRICE")?;
+            let side = arg_parse::<Side>(args, "SIDE")?;
+            let r#type = Type::Limit;
 
-            return Ok(Task::TradeRequest(TradeRequest::NewOrder(proto::NewRequest {
-                exchange: exchange.to_string(),
-                symbol: symbol.to_string(),
-                side: side.to_string(),
-                r#type: type_.to_string(),
+            return Ok(Task::Trade(Trade::NewOrder(NewOrderCall {
+                exchange: exchange as i32,
+                symbol: Some(symbol),
+                side: side as i32,
+                r#type: r#type as i32,
                 quantity,
                 price,
-                time_in_force: TimeInForce::GTC.to_string(),
+                time_in_force: TimeInForce::Gtc as i32,
             })));
         }
         Some(("cxl", args)) => {
-            let exchange = Exchange::from_str(arg_to_str(args, "EXCHANGE").as_str())?;
-            let symbol = Symbol::from_str(arg_to_str(args, "SYMBOL").as_str())?;
-            let order_id = arg_to_str(args, "ID");
+            let exchange = arg_parse::<Exchange>(args, "EXCHANGE")?;
+            let symbol = arg_parse::<Symbol>(args, "SYMBOL")?;
+            let order_id = arg_parse::<String>(args, "ID")?;
 
-            return Ok(Task::TradeRequest(TradeRequest::CxlOrder(proto::CxlRequest {
+            return Ok(Task::Trade(Trade::CxlOrder(CxlOrderCall {
                 order_id,
-                exchange: exchange.to_string(),
-                symbol: symbol.to_string(),
+                exchange: exchange as i32,
+                symbol: Some(symbol),
             })));
         }
         _ => { panic!("No such command!"); }

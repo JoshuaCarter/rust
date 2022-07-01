@@ -18,13 +18,13 @@ async fn main() -> Result<()> {
     let mut grpc_client = grpc::start_client("http://[::]:50051").await?;
 
     match task {
-        cli::Task::TradeRequest(trade) => {
+        cli::Task::Trade(trade) => {
             match trade {
-                cli::TradeRequest::NewOrder(req) => {
+                cli::Trade::NewOrder(req) => {
                     let res = grpc_client.trading.new_order(req).await?;
                     println!("{:#?}", res);
                 }
-                cli::TradeRequest::CxlOrder(req) => {
+                cli::Trade::CxlOrder(req) => {
                     let res = grpc_client.trading.cxl_order(req).await?;
                     println!("{:#?}", res);
                 }

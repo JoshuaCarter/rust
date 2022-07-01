@@ -1,5 +1,5 @@
-use async_trait::async_trait;
+use super::trading::TradingVenue;
 
 // venue super trait
-#[async_trait]
-pub trait Venue: proto_types::trading::ProtoService {}
+#[tonic::async_trait]
+pub trait Venue: TradingVenue {}
