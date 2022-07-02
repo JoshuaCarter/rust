@@ -1,0 +1,2 @@
+0.0.0.0 api.binance.com
+0.0.0.0 ftx.com

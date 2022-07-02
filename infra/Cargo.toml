@@ -1,0 +1,25 @@
+# https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[package]
+name = "infra"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+serde = { version = "1.0", features = ["derive"] }                                          # de/serialisation lib
+serde_json = "1.0"                                                                          # json lib
+futures = "0.3"                                                                             # async lib
+anyhow = "1.0"                                                                              # error agnositc result lib
+reqwest = { version = "0.11", default-features = false, features = ["rustls-tls", "json"] } # http lib
+chrono = "0.4"                                                                              # time lib
+ring = "0.16"                                                                               # crypto lib
+hex = "0.4"                                                                                 # hex lib
+tokio-tungstenite = "0.17"                                                                  # websock lib
+lazy-regex = "2.3"                                                                          # regex lib
+strum = "0.24"                                                                              # STRing/enUM util lib
+strum_macros = "0.24"                                                                       # STRing/enUM macro lib
+tonic = "0.7"                                                                               # grpc lib
+prost = "0.10"                                                                              # proto lib
+
+[build-dependencies]
+tonic-build = "0.7"                                                                         # proto grpc builder lib

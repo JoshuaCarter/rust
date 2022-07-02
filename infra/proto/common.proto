@@ -1,0 +1,39 @@
+syntax = "proto3";
+package common;
+
+enum Exchange {
+    Binance = 0;
+    FTX = 1;
+}
+
+enum Side {
+    Ask = 0;
+    Bid = 1;
+}
+
+enum Type {
+    Limit = 0;
+    Market = 1;
+}
+
+enum TimeInForce {
+    GTC = 0;
+    IOC = 1;
+    FOK = 2;
+}
+
+enum Status {
+    Pending = 0;
+    Open = 1;
+    Closed = 2;
+}
+
+message Symbol {
+    string base = 1;
+    string quote = 2;
+}
+
+message Fill {
+    double price = 1;
+    double quantity = 2;
+}

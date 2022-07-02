@@ -1,4 +1,4 @@
 # https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [workspace]
-members = ["mybin", "mylib"]
+members = ["node", "terminal", "infra"]

@@ -1,3 +1,13 @@
 {
 	"rust-analyzer.checkOnSave.command": "clippy",
+	"rust-analyzer.cargo.unsetTest": [
+		"core",
+		"tokio",
+		"tokio-macros"
+	],
+	"protoc": {
+		"options": [
+			"--proto_path=${workspaceRoot}/infra/proto",
+		]
+	},
 }
