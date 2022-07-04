@@ -1,11 +1,4 @@
-use anyhow::Result;
 use super::{trading::*, common::*};
-
-#[tonic::async_trait]
-pub trait TradingVenue {
-    async fn new_order(&self, r: NewOrderRequest) -> Result<NewOrderResponse>;
-    async fn cxl_order(&self, r: CxlOrderRequest) -> Result<CxlOrderResponse>;
-}
 
 #[derive(Debug)]
 pub struct NewOrderRequest {

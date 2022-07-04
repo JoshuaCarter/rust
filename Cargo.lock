@@ -607,6 +607,7 @@ dependencies = [
  "serde_json",
  "strum",
  "strum_macros",
+ "tokio",
  "tokio-tungstenite",
  "tonic",
  "tonic-build",
@@ -764,6 +765,7 @@ dependencies = [
  "strum",
  "strum_macros",
  "tokio",
+ "tokio-stream",
  "tokio-tungstenite",
  "tonic",
 ]

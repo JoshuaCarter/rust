@@ -1,8 +1,13 @@
-use std::{net::SocketAddr, str::FromStr};
+use std::{net::SocketAddr, str::FromStr, pin::Pin};
 use anyhow::Result;
+use futures::Stream;
+use tonic::{transport::Server, metadata::{MetadataValue, Ascii}, Status, service::Interceptor, Response};
 use infra::model::trading::trading_server::*;
-use tonic::{transport::Server, metadata::{MetadataValue, Ascii}, Status, service::Interceptor};
+use infra::model::market::market_server::*;
 use super::trading::TradingService;
+use super::market::MarketService;
+
+pub type GrpcStream<T> = Pin<Box<dyn Send + Stream<Item = Result<T, Status>>>>;
 
 #[derive(Clone)]
 pub struct GrpcInterceptor {
@@ -27,7 +32,8 @@ pub async fn start_server(uri: &str) -> Result<()> {
     };
 
     Server::builder()
-        .add_service(TradingServer::with_interceptor(TradingService::default(), interceptor))
+        .add_service(TradingServer::with_interceptor(TradingService::default(), interceptor.clone()))
+        .add_service(MarketServer::with_interceptor(MarketService::default(), interceptor.clone()))
         .serve(addy)
         .await?;
 

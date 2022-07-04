@@ -1,0 +1,20 @@
+syntax = "proto3";
+package market;
+
+import "common.proto";
+
+service Market {
+    rpc BookUpdates (BookUpdatesCall) returns (stream BookUpdatesReply);
+}
+
+message BookUpdatesCall {
+    common.Exchange exchange = 1;
+    common.Symbol symbol = 2;
+}
+
+message BookUpdatesReply {
+    common.Exchange exchange = 1;
+    common.Symbol symbol = 2;
+    repeated common.Fill asks = 3;
+    repeated common.Fill bids = 4;
+}

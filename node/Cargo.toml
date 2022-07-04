@@ -12,6 +12,7 @@ serde_json = "1.0"                                                              
 tonic = "0.7"                                                                               # grpc lib
 futures = "0.3"                                                                             # promises
 tokio = { version = "1", features = ["full"] }                                              # allows async main
+tokio-stream = "0.1.9"                                                                      # steam lib
 tokio-tungstenite = "0.17"                                                                  # websock lib
 dotenvy = "0.15.1"                                                                          # .env file lib
 anyhow = "1.0"                                                                              # error agnositc result lib

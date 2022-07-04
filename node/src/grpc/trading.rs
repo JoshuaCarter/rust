@@ -3,6 +3,7 @@ use tonic::{
     Response,
     Status,
 };
+use infra::model::venue::*;
 use infra::model::trading::*;
 use infra::model::trading::trading_server::Trading;
 use crate::venues;

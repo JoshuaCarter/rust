@@ -4,8 +4,8 @@ package trading;
 import "common.proto";
 
 service Trading {
-    rpc new_order (NewOrderCall) returns (NewOrderReply);
-    rpc cxl_order (CxlOrderCall) returns (CxlOrderReply);
+    rpc NewOrder (NewOrderCall) returns (NewOrderReply);
+    rpc CxlOrder (CxlOrderCall) returns (CxlOrderReply);
 }
 
 message NewOrderCall {

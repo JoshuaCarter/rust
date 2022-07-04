@@ -2,13 +2,16 @@
 
 use super::api;
 use std::str::FromStr;
-use infra::{utils::time, model::venue::Venue};
+use infra::utils::time;
 use infra::net::Params;
 use infra::model::common::*;
 use infra::model::trading::*;
+use infra::model::market::*;
+use infra::model::venue::*;
 use anyhow::Result;
 use reqwest::{Client, RequestBuilder};
 use ring::hmac;
+use tokio::sync::mpsc::Sender;
 
 #[derive(Debug)]
 pub struct Binance {
@@ -123,6 +126,19 @@ impl TradingVenue for Binance {
         return Ok(res);
     }
 }
+
+// #[tonic::async_trait]
+// impl MarketVenue for Binance {
+//     async fn book_updates(&self, req: BookUpdatesRequest, sender: Sender<BookUpdatesResponse>) -> Result<BookUpdatesResponse> {
+
+//         // let (tx, rx) = mpsc::channel(128);
+
+//         // let output_stream = ReceiverStream::new(rx);
+//         // return Ok(Response::new(
+//         //     Box::pin(output_stream) as Self::BookUpdatesStream
+//         // ));
+//     }
+// }
 
 fn adapt_status(status: String) -> Result<Status> {
     match status.as_str() {
