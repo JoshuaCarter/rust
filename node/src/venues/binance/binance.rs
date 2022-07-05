@@ -11,13 +11,13 @@ use infra::model::venue::*;
 use anyhow::Result;
 use reqwest::{Client, RequestBuilder};
 use ring::hmac;
-use tokio::sync::mpsc::Sender;
 
 #[derive(Debug)]
 pub struct Binance {
     http: Client,
     key: String,
     secret: String,
+    count: f64,
 }
 
 impl Binance {
@@ -26,6 +26,7 @@ impl Binance {
             http: Client::new(),
             key: std::env::var("ENV_BINANCE_KEY").unwrap(),
             secret: std::env::var("ENV_BINANCE_SECKEY").unwrap(),
+            count: 0.0,
         };
     }
 
@@ -65,7 +66,7 @@ impl Venue for Binance {}
 
 #[tonic::async_trait]
 impl TradingVenue for Binance {
-    async fn new_order(&self, req: NewOrderRequest) -> Result<NewOrderResponse> {
+    async fn new_order(&mut self, req: NewOrderRequest) -> Result<NewOrderResponse> {
         let api_req = api::HttpNewRequest {
             symbol: req.symbol.to_string_without_delim(),
             r#type: req.r#type.to_string().to_uppercase(),
@@ -101,7 +102,7 @@ impl TradingVenue for Binance {
         return Ok(res);
     }
 
-    async fn cxl_order(&self, req: CxlOrderRequest) -> Result<CxlOrderResponse> {
+    async fn cxl_order(&mut self, req: CxlOrderRequest) -> Result<CxlOrderResponse> {
         let api_req = api::HttpCxlRequest {
             symbol: req.symbol.to_string_without_delim(),
             orderId: u64::from_str(req.order_id.as_str())?,
@@ -127,18 +128,18 @@ impl TradingVenue for Binance {
     }
 }
 
-// #[tonic::async_trait]
-// impl MarketVenue for Binance {
-//     async fn book_updates(&self, req: BookUpdatesRequest, sender: Sender<BookUpdatesResponse>) -> Result<BookUpdatesResponse> {
-
-//         // let (tx, rx) = mpsc::channel(128);
-
-//         // let output_stream = ReceiverStream::new(rx);
-//         // return Ok(Response::new(
-//         //     Box::pin(output_stream) as Self::BookUpdatesStream
-//         // ));
-//     }
-// }
+#[tonic::async_trait]
+impl MarketVenue for Binance {
+    async fn book_updates(&mut self, req: BookUpdatesRequest) -> Result<BookUpdatesResponse> {
+        self.count += 1.0;
+        return Ok(BookUpdatesResponse {
+            exchange: req.exchange,
+            symbol: req.symbol,
+            asks: vec![Fill {price: self.count, quantity: 0.0}],
+            bids: vec![],
+        });
+    }
+}
 
 fn adapt_status(status: String) -> Result<Status> {
     match status.as_str() {

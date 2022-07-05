@@ -1,7 +1,7 @@
 
 use super::{market::*, common::*};
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct BookUpdatesRequest {
     pub exchange: Exchange,
     pub symbol: Symbol,
@@ -15,7 +15,7 @@ impl From<BookUpdatesCall> for BookUpdatesRequest {
     }
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct BookUpdatesResponse {
     pub exchange: Exchange,
     pub symbol: Symbol,

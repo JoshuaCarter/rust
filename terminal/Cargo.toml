@@ -7,7 +7,7 @@ edition = "2021"
 
 [dependencies]
 infra = { path = "../infra", version = "*" }                # our infra lib
-tonic = "0.7"                                               # grpc lib
+tonic = { version = "0", features = ["transport", "tls"] }  # grpc lib
 futures = "0.3"                                             # promises
 tokio = { version = "1", features = ["full"] }              # allows async main
 dotenvy = "0.15.1"                                          # .env file lib

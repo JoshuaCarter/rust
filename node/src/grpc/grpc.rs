@@ -1,7 +1,7 @@
 use std::{net::SocketAddr, str::FromStr, pin::Pin};
 use anyhow::Result;
 use futures::Stream;
-use tonic::{transport::Server, metadata::{MetadataValue, Ascii}, Status, service::Interceptor, Response};
+use tonic::{transport::Server, metadata::{MetadataValue, Ascii}, Status, service::Interceptor};
 use infra::model::trading::trading_server::*;
 use infra::model::market::market_server::*;
 use super::trading::TradingService;
@@ -32,8 +32,9 @@ pub async fn start_server(uri: &str) -> Result<()> {
     };
 
     Server::builder()
-        .add_service(TradingServer::with_interceptor(TradingService::default(), interceptor.clone()))
-        .add_service(MarketServer::with_interceptor(MarketService::default(), interceptor.clone()))
+        .layer(tonic::service::interceptor(interceptor))
+        .add_service(TradingServer::new(TradingService::default()))
+        .add_service(MarketServer::new(MarketService::default()))
         .serve(addy)
         .await?;
 

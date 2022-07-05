@@ -17,7 +17,7 @@ impl Trading for TradingService {
         let req = NewOrderRequest::from(request.into_inner());
         println!("NEW REQ: {:#?}", req);
 
-        let venue = venues::create_venue(req.exchange).map_err(err_to_status)?;
+        let mut venue = venues::create_venue(req.exchange).map_err(err_to_status)?;
         let res = venue.new_order(req).await.map_err(err_to_status)?;
 
         return Ok(Response::new(NewOrderReply::from(res)));
@@ -27,7 +27,7 @@ impl Trading for TradingService {
         let req = CxlOrderRequest::from(request.into_inner());
         println!("CXL REQ: {:#?}", req);
 
-        let venue = venues::create_venue(req.exchange).map_err(err_to_status)?;
+        let mut venue = venues::create_venue(req.exchange).map_err(err_to_status)?;
         let res = venue.cxl_order(req).await.map_err(err_to_status)?;
 
         return Ok(Response::new(CxlOrderReply::from(res)));

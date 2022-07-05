@@ -1,6 +1,6 @@
 use super::{trading::*, common::*};
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct NewOrderRequest {
     pub exchange: Exchange,
     pub symbol: Symbol,
@@ -24,7 +24,7 @@ impl From<NewOrderCall> for NewOrderRequest {
     }
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct NewOrderResponse {
     pub order_id: String,
     pub exchange: Exchange,
@@ -73,7 +73,7 @@ impl From<NewOrderResponse> for NewOrderReply {
     }
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct CxlOrderRequest {
     pub order_id: String,
     pub exchange: Exchange,
@@ -89,7 +89,7 @@ impl From<CxlOrderCall> for CxlOrderRequest {
     }
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct CxlOrderResponse {
     pub order_id: String,
     pub exchange: Exchange,

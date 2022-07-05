@@ -1,12 +1,14 @@
 use std::str::FromStr;
 use anyhow::Result;
-use infra::model::trading::trading_client::TradingClient;
+use infra::model::{trading::trading_client::TradingClient, market::market_client::MarketClient};
 use tonic::{transport::{Channel, Endpoint}, metadata::{MetadataValue, Ascii}, codegen::InterceptedService, Status, service::Interceptor};
 
 pub struct GrpcClient {
     pub trading: TradingClient<InterceptedService<Channel, GrpcInterceptor>>,
+    pub market: MarketClient<InterceptedService<Channel, GrpcInterceptor>>,
 }
 
+#[derive(Clone)]
 pub struct GrpcInterceptor {
     token: MetadataValue<Ascii>,
 }
@@ -26,6 +28,7 @@ pub async fn start_client(uri: &str) -> Result<GrpcClient> {
     };
 
     return Ok(GrpcClient {
-        trading: TradingClient::with_interceptor(channel, interceptor),
+        trading: TradingClient::with_interceptor(channel.clone(), interceptor.clone()),
+        market: MarketClient::with_interceptor(channel, interceptor),
     });
 }

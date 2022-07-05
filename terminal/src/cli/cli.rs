@@ -2,19 +2,26 @@ use std::str::FromStr;
 use anyhow::Result;
 use clap::{Command, arg, ArgMatches, App};
 use infra::model::common::*;
+use infra::model::market::*;
 use infra::model::trading::*;
 
 pub use clap::Parser;
 
 #[derive(Debug)]
-pub enum Trade {
+pub enum Trading {
     NewOrder(NewOrderCall),
     CxlOrder(CxlOrderCall),
 }
 
 #[derive(Debug)]
+pub enum Market {
+    BookUpdates(BookUpdatesCall),
+}
+
+#[derive(Debug)]
 pub enum Task {
-    Trade(Trade),
+    Trading(Trading),
+    Market(Market),
 }
 
 /// Process command line args into an order object
@@ -48,7 +55,15 @@ fn make_app() -> Box<App<'static>> {
                 .arg(arg!(<EXCHANGE> "The exchange with our order"))
                 .arg(arg!(<SYMBOL> "The symbol for our order"))
                 .arg(arg!(<ID> "The order id of our order"))
-        ));
+        )
+        .subcommand(
+            Command::new("book")
+                .about("Watch top of book")
+                .arg_required_else_help(true)
+                .arg(arg!(<EXCHANGE> "The exchange to watch"))
+                .arg(arg!(<SYMBOL> "The symbol to watch"))
+        )
+    );
 }
 
 fn arg_parse<T: FromStr>(args: &ArgMatches, name: &str) -> Result<T, anyhow::Error> {
@@ -73,7 +88,7 @@ fn app_to_task(app: Box<App>) -> Result<Task> {
             let side = arg_parse::<Side>(args, "SIDE")?;
             let r#type = Type::Limit;
 
-            return Ok(Task::Trade(Trade::NewOrder(NewOrderCall {
+            return Ok(Task::Trading(Trading::NewOrder(NewOrderCall {
                 exchange: exchange as i32,
                 symbol: Some(symbol),
                 side: side as i32,
@@ -88,8 +103,17 @@ fn app_to_task(app: Box<App>) -> Result<Task> {
             let symbol = arg_parse::<Symbol>(args, "SYMBOL")?;
             let order_id = arg_parse::<String>(args, "ID")?;
 
-            return Ok(Task::Trade(Trade::CxlOrder(CxlOrderCall {
+            return Ok(Task::Trading(Trading::CxlOrder(CxlOrderCall {
                 order_id,
+                exchange: exchange as i32,
+                symbol: Some(symbol),
+            })));
+        }
+        Some(("book", args)) => {
+            let exchange = arg_parse::<Exchange>(args, "EXCHANGE")?;
+            let symbol = arg_parse::<Symbol>(args, "SYMBOL")?;
+
+            return Ok(Task::Market(Market::BookUpdates(BookUpdatesCall {
                 exchange: exchange as i32,
                 symbol: Some(symbol),
             })));

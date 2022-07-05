@@ -1,3 +1,4 @@
+use infra::model::venue::MarketVenue;
 use tokio::sync::mpsc;
 use tonic::{
     Request,
@@ -21,20 +22,27 @@ impl Market for MarketService {
         let req = BookUpdatesRequest::from(request.into_inner());
         println!("BOOK REQ: {:#?}", req);
 
-        let (tx, rx) = mpsc::channel::<Result<BookUpdatesReply, Status>>(128);
-        let venue = venues::create_venue(req.exchange).map_err(err_to_status)?;
-        // let res = venue.book_updates(req, tx).await;
+        let (tx, rx) = mpsc::channel::<Result<BookUpdatesReply, Status>>(1);
+        let mut venue = venues::create_venue(req.exchange).map_err(err_to_status)?;
 
-        let output_stream = ReceiverStream::new(rx);
-        // let mapped = output_stream.map(|f| -> GrpcResult<BookUpdatesReply> {
-        //     match f {
-        //         Ok(x) => Ok(Response::new(BookUpdatesReply::from(x))),
-        //         Err(e) => Err(Status::internal(e.to_string())),
-        //     }
-        // });
+        tokio::spawn(async move {
+            loop {
+                infra::utils::time::delay(500).await; // TEMP
+                let res = venue.book_updates(req.clone()).await.map_err(err_to_status);
+                match res {
+                    Ok(r) => {
+                        match tx.send(Ok(BookUpdatesReply::from(r))).await {
+                            Ok(_) => continue,
+                            Err(_) => break, // failed to send to client
+                        }
+                    },
+                    Err(_) => break, // failed to get exchange data
+                }
+            }
+        });
 
-        let stream = Box::pin(output_stream);
-        return Ok(Response::new(stream));
+        let output_stream = Box::pin(ReceiverStream::new(rx)) as Self::BookUpdatesStream;
+        return Ok(Response::new(output_stream));
     }
 }
 

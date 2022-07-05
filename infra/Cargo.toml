@@ -19,8 +19,8 @@ tokio-tungstenite = "0.17"                                                      
 lazy-regex = "2.3"                                                                          # regex lib
 strum = "0.24"                                                                              # STRing/enUM util lib
 strum_macros = "0.24"                                                                       # STRing/enUM macro lib
-tonic = "0.7"                                                                               # grpc lib
+tonic = "0"                                                                                 # grpc lib
 prost = "0.10"                                                                              # proto lib
 
 [build-dependencies]
-tonic-build = "0.7"                                                                         # proto grpc builder lib
+tonic-build = "0"                                                                           # proto grpc builder lib
