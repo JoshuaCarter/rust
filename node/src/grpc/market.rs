@@ -27,7 +27,7 @@ impl Market for MarketService {
 
         tokio::spawn(async move {
             loop {
-                infra::utils::time::delay(500).await; // TEMP
+                infra::utils::time::delay(1000).await; // TEMP
                 let res = venue.book_updates(req.clone()).await.map_err(err_to_status);
                 match res {
                     Ok(r) => {

@@ -13,7 +13,7 @@ tonic = { version = "0", features = ["transport", "tls"] }                      
 futures = "0.3"                                                                             # promises
 tokio = { version = "1", features = ["full"] }                                              # allows async main
 tokio-stream = "0.1.9"                                                                      # steam lib
-tokio-tungstenite = "0.17"                                                                  # websock lib
+tokio-tungstenite = { version = "0.17", features = ["rustls-tls-native-roots"] }            # websock lib
 dotenvy = "0.15.1"                                                                          # .env file lib
 anyhow = "1.0"                                                                              # error agnositc result lib
 reqwest = { version = "0.11", default-features = false, features = ["rustls-tls", "json"] } # http lib
@@ -22,3 +22,4 @@ hex = "0.4"                                                                     
 lazy-regex = "2.3"                                                                          # regex lib
 strum = "0.24"                                                                              # STRing/enUM util lib
 strum_macros = "0.24"                                                                       # STRing/enUM macro lib
+url = "2.2"                                                                                 # url struct (for ws)

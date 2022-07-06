@@ -11,13 +11,17 @@ use infra::model::venue::*;
 use anyhow::Result;
 use reqwest::{Client, RequestBuilder};
 use ring::hmac;
+use tokio_tungstenite::{connect_async, tungstenite::protocol::Message};
+use tokio::io::{AsyncReadExt, AsyncWriteExt};
+use futures::{future, pin_mut, StreamExt, SinkExt};
+use std::{net::SocketAddr, time::Duration};
+use tokio::net::{TcpListener, TcpStream};
 
 #[derive(Debug)]
 pub struct Binance {
     http: Client,
     key: String,
     secret: String,
-    count: f64,
 }
 
 impl Binance {
@@ -26,7 +30,6 @@ impl Binance {
             http: Client::new(),
             key: std::env::var("ENV_BINANCE_KEY").unwrap(),
             secret: std::env::var("ENV_BINANCE_SECKEY").unwrap(),
-            count: 0.0,
         };
     }
 
@@ -34,17 +37,14 @@ impl Binance {
     //     let req = self.http.get(endpoints::TIME);
     //     let res_json = req.send().await?.text().await?;
     //     let res = serde_json::from_str::<types::TimeResponse>(res_json.as_str())?;
-
     //     return Ok(res);
     // }
 
     // pub async fn request_account(&self) -> Result<String> {
     //     let mut params = Params::from(vec![]);
-
     //     let req = self.sign_request(self.http.get(endpoints::ACCOUNT), &mut params);
     //     let res = req.send().await?;
     //     let res_json = res.text().await?;
-
     //     return Ok(res_json);
     // }
 
@@ -131,11 +131,35 @@ impl TradingVenue for Binance {
 #[tonic::async_trait]
 impl MarketVenue for Binance {
     async fn book_updates(&mut self, req: BookUpdatesRequest) -> Result<BookUpdatesResponse> {
-        self.count += 1.0;
+
+        let url = url::Url::parse(api::endpoints::WEBSOCKET)?;
+        println!("{:#?}", url);
+
+        let (socket, _)  = connect_async(url).await?;
+        println!("WebSocket handshake has been successfully completed");
+
+        let (mut sender, receiver) = socket.split();
+
+        let sock_req = api::SockPartialBookDepthStream {
+            method: api::SockMethods::SUBSCRIBE.into(),
+            params: vec!["ethbtc@depth5".into()],
+            id: 1,
+        };
+
+        sender.send(Message::Text(serde_json::to_string(&sock_req)?)).await?;
+
+        println!("receiving...");
+        receiver.for_each(|message| async {
+            let text = message.unwrap().into_text().unwrap();
+            println!("received... {}", text);
+        }).await;
+
+        sender.close().await?;
+
         return Ok(BookUpdatesResponse {
             exchange: req.exchange,
             symbol: req.symbol,
-            asks: vec![Fill {price: self.count, quantity: 0.0}],
+            asks: vec![Fill {price: 0.0, quantity: 0.0}],
             bids: vec![],
         });
     }

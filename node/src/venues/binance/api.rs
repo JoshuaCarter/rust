@@ -5,6 +5,7 @@ use serde::Deserialize;
 use serde::Serialize;
 
 pub mod endpoints {
+    pub const WEBSOCKET: &str = "wss://stream.binance.com:9443/ws";
     pub const ACCOUNT: &str =   "https://api.binance.com/api/v3/account";
     pub const ORDER: &str =     "https://api.binance.com/api/v3/order";
     pub const TIME: &str =      "https://api.binance.com/api/v3/time";
@@ -20,13 +21,12 @@ pub struct Fill {
     pub commissionAsset: String,
 }
 
-// REQUEST TYPES
+// HTTP REQUEST TYPES
 
 #[derive(Debug, Serialize)]
 pub struct HttpNewRequest {
     pub symbol: String,
     pub side: String,
-    // #[serde(rename = "type")]
     pub r#type: String,
     pub quantity: f64,
     pub price: f64,
@@ -39,7 +39,7 @@ pub struct HttpCxlRequest {
     pub orderId: u64,
 }
 
-// RESPONSE TYPES
+// HTTP RESPONSE TYPES
 
 #[derive(Debug, Deserialize)]
 pub struct HttpNewResponse {
@@ -52,7 +52,6 @@ pub struct HttpNewResponse {
     pub cummulativeQuoteQty: String,
     pub status: String,
     pub timeInForce: String,
-    // #[serde(rename = "type")]
     pub r#type: String,
     pub side: String,
     pub fills: Vec<Fill>,
@@ -68,7 +67,6 @@ pub struct HttpCxlResponse {
     pub cummulativeQuoteQty: String,
     pub status: String,
     pub timeInForce: String,
-    // #[serde(rename = "type")]
     pub r#type: String,
     pub side: String,
 }
@@ -77,3 +75,19 @@ pub struct HttpCxlResponse {
 pub struct HttpTimeResponse {
     pub serverTime: u64,
 }
+
+// SOCK REQUEST TYPES
+
+pub mod SockMethods {
+    pub const SUBSCRIBE: &str = "SUBSCRIBE";
+}
+
+#[derive(Debug, Serialize)]
+pub struct SockPartialBookDepthStream {
+    pub method: String,
+    pub params: Vec<String>,
+    pub id: i32,
+}
+
+
+// SOCK MSG TYPES
