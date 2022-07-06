@@ -1,6 +1,7 @@
-use super::market_proto::{BookUpdatesRequest, BookUpdatesResponse};
+use super::market_proto::{BookUpdatesRequest, BookUpdatesMessage};
 use super::trading_proto::{NewOrderRequest, CxlOrderRequest, CxlOrderResponse, NewOrderResponse};
 use anyhow::Result;
+use tokio::sync::mpsc::Sender;
 
 #[tonic::async_trait]
 pub trait Venue: TradingVenue + MarketVenue {}
@@ -13,5 +14,5 @@ pub trait TradingVenue {
 
 #[tonic::async_trait]
 pub trait MarketVenue {
-    async fn book_updates(&mut self, r: BookUpdatesRequest) -> Result<BookUpdatesResponse>;
+    async fn book_updates(&mut self, r: BookUpdatesRequest, tx: Sender<BookUpdatesMessage>) -> Result<()>;
 }

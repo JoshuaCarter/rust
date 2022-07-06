@@ -11,7 +11,7 @@ pub mod endpoints {
     pub const TIME: &str =      "https://api.binance.com/api/v3/time";
 }
 
-// SHARED TYPES
+// HTTP TYPES
 
 #[derive(Debug, Deserialize)]
 pub struct Fill {
@@ -21,7 +21,7 @@ pub struct Fill {
     pub commissionAsset: String,
 }
 
-// HTTP REQUEST TYPES
+// HTTP REQUESTS
 
 #[derive(Debug, Serialize)]
 pub struct HttpNewRequest {
@@ -39,7 +39,7 @@ pub struct HttpCxlRequest {
     pub orderId: u64,
 }
 
-// HTTP RESPONSE TYPES
+// HTTP RESPONSES
 
 #[derive(Debug, Deserialize)]
 pub struct HttpNewResponse {
@@ -76,18 +76,26 @@ pub struct HttpTimeResponse {
     pub serverTime: u64,
 }
 
-// SOCK REQUEST TYPES
+// SOCK TYPES
 
 pub mod SockMethods {
     pub const SUBSCRIBE: &str = "SUBSCRIBE";
 }
 
+// SOCK REQUESTS
+
 #[derive(Debug, Serialize)]
-pub struct SockPartialBookDepthStream {
+pub struct SockDepthStreamRequest {
     pub method: String,
     pub params: Vec<String>,
     pub id: i32,
 }
 
+// SOCK MESSAGES
 
-// SOCK MSG TYPES
+#[derive(Debug, Deserialize)]
+pub struct SockDepthStreamMessage {
+    pub lastUpdateId: u64,
+    pub bids: Vec<Vec<String>>,
+    pub asks: Vec<Vec<String>>,
+}

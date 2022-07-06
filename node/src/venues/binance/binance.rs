@@ -1,21 +1,19 @@
 // https://binance-docs.github.io/apidocs/spot/en/#general-api-information
 
 use super::api;
+use super::adapter;
 use std::str::FromStr;
 use infra::utils::time;
 use infra::net::Params;
-use infra::model::common::*;
 use infra::model::trading::*;
 use infra::model::market::*;
 use infra::model::venue::*;
 use anyhow::Result;
 use reqwest::{Client, RequestBuilder};
 use ring::hmac;
+use tokio::sync::mpsc::Sender;
 use tokio_tungstenite::{connect_async, tungstenite::protocol::Message};
-use tokio::io::{AsyncReadExt, AsyncWriteExt};
-use futures::{future, pin_mut, StreamExt, SinkExt};
-use std::{net::SocketAddr, time::Duration};
-use tokio::net::{TcpListener, TcpStream};
+use futures::{StreamExt, SinkExt};
 
 #[derive(Debug)]
 pub struct Binance {
@@ -90,13 +88,13 @@ impl TradingVenue for Binance {
             exchange: req.exchange,
             symbol: req.symbol,
             side: req.side,
-            status: adapt_status(api_res.status)?,
+            status: adapter::str_to_status(api_res.status)?,
             r#type: req.r#type,
             time_in_force: req.time_in_force,
             price: api_res.price.parse::<f64>()?,
             quantity: api_res.origQty.parse::<f64>()?,
             executed: api_res.executedQty.parse::<f64>()?,
-            fills: adapt_fills(api_res.fills)?,
+            fills: adapter::fills_to_fills(api_res.fills)?,
         };
 
         return Ok(res);
@@ -121,7 +119,7 @@ impl TradingVenue for Binance {
             order_id: api_res.orderId.to_string(),
             exchange: req.exchange,
             symbol: req.symbol,
-            status: adapt_status(api_res.status)?,
+            status: adapter::str_to_status(api_res.status)?,
         };
 
         return Ok(res);
@@ -130,58 +128,46 @@ impl TradingVenue for Binance {
 
 #[tonic::async_trait]
 impl MarketVenue for Binance {
-    async fn book_updates(&mut self, req: BookUpdatesRequest) -> Result<BookUpdatesResponse> {
+    async fn book_updates(&mut self, req: BookUpdatesRequest, tx: Sender<BookUpdatesMessage>) -> Result<()> {
+        // connect sock
+        let (socket, _) = connect_async(url::Url::parse(api::endpoints::WEBSOCKET)?).await?;
+        let (mut sender, mut receiver) = socket.split();
 
-        let url = url::Url::parse(api::endpoints::WEBSOCKET)?;
-        println!("{:#?}", url);
-
-        let (socket, _)  = connect_async(url).await?;
-        println!("WebSocket handshake has been successfully completed");
-
-        let (mut sender, receiver) = socket.split();
-
-        let sock_req = api::SockPartialBookDepthStream {
+        // sub to book
+        let sock_req = api::SockDepthStreamRequest {
             method: api::SockMethods::SUBSCRIBE.into(),
-            params: vec!["ethbtc@depth5".into()],
-            id: 1,
+            params: vec![format!("{}@depth5", req.symbol.to_string_without_delim().to_lowercase())],
+            id: 0,
         };
-
         sender.send(Message::Text(serde_json::to_string(&sock_req)?)).await?;
 
-        println!("receiving...");
-        receiver.for_each(|message| async {
-            let text = message.unwrap().into_text().unwrap();
-            println!("received... {}", text);
-        }).await;
+        // listen for book updates
+        while let Some(Ok(next)) = receiver.next().await {
+            let text = next.into_text()?;
 
+            let sock_msg = serde_json::from_str::<api::SockDepthStreamMessage>(text.as_str());
+            match sock_msg {
+                Ok(msg) => {
+
+                    let res = BookUpdatesMessage {
+                        exchange: req.exchange,
+                        symbol: req.symbol.clone(),
+                        asks: adapter::strs_to_fills(msg.asks).unwrap(),
+                        bids: adapter::strs_to_fills(msg.bids).unwrap(),
+                    };
+
+                    // pass msg to caller
+                    match tx.send(res).await {
+                        Ok(_) => {}
+                        Err(_) => { println!("listener gone"); break; }
+                    }
+                }
+                Err(e) => { println!("failed to decode... {}, err {:#?}", text, e); }
+            }
+        }
+
+        // close sock
         sender.close().await?;
-
-        return Ok(BookUpdatesResponse {
-            exchange: req.exchange,
-            symbol: req.symbol,
-            asks: vec![Fill {price: 0.0, quantity: 0.0}],
-            bids: vec![],
-        });
+        return Ok(());
     }
-}
-
-fn adapt_status(status: String) -> Result<Status> {
-    match status.as_str() {
-        "NEW" | "PARTIALLY_FILLED" => { return Ok(Status::Open); }
-        "FILLED" |"CANCELED" | "PENDING_CANCEL" | "REJECTED" | "EXPIRED" => { return Ok(Status::Closed); }
-        _ => { return Err(anyhow::anyhow!("Unhandled status '{}'", status)); }
-    }
-}
-
-fn adapt_fills(fills: Vec<api::Fill>) -> Result<Vec<Fill>> {
-    let mut new: Vec<Fill> = Vec::new();
-
-    for f in fills {
-        new.push(Fill {
-            price: f.price.parse::<f64>()?,
-            quantity: f.qty.parse::<f64>()?,
-        });
-    }
-
-    return Ok(new);
 }

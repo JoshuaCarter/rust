@@ -1,7 +1,7 @@
 pub use std::str::FromStr;
 pub use crate::error::FromStrError;
+pub use std::fmt::Display;
 
-use std::fmt::Display;
 use lazy_regex::regex_captures;
 
 use super::common::*;
