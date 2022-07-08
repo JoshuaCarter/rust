@@ -1,0 +1,10 @@
+syntax = "proto3";
+package health;
+
+service Health {
+    rpc Ping (stream PingPong) returns (stream PingPong);
+}
+
+message PingPong {
+    int32 sequence = 1;
+}

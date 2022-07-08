@@ -2,15 +2,18 @@
 #![allow(clippy::module_inception)]
 #![allow(clippy::new_without_default)]
 
-use anyhow::Result;
-
 mod cli;
 mod grpc;
 
 #[tokio::main]
-async fn main() -> Result<()> {
+async fn main() -> anyhow::Result<()> {
     // load .env
     dotenvy::dotenv().ok();
+
+    ctrlc::set_handler(|| {
+        println!("CTRLC @ {}", infra::utils::time::now_ms());
+        std::process::exit(0);
+    })?;
 
     let task = cli::process_input()?;
 

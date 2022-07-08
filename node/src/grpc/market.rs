@@ -33,7 +33,7 @@ impl Market for MarketService {
                 // send to client
                 match grpc_tx.send(Ok(BookUpdatesReply::from(res))).await {
                     Ok(_) => continue,
-                    Err(_) => break, // failed to send to client
+                    Err(_) => { println!("BOOK DISCON @ {}", infra::utils::time::now_ms()); break; }, // failed to send to client
                 }
             }
         });

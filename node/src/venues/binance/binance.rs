@@ -3,6 +3,7 @@
 use super::api;
 use super::adapter;
 use std::str::FromStr;
+use infra::utils;
 use infra::utils::time;
 use infra::net::Params;
 use infra::model::trading::*;
@@ -159,8 +160,9 @@ impl MarketVenue for Binance {
                     // pass msg to caller
                     match tx.send(res).await {
                         Ok(_) => {}
-                        Err(_) => { println!("listener gone"); break; }
+                        Err(_) => { println!("binance listener gone"); break; }
                     }
+                    utils::time::delay(10000).await;
                 }
                 Err(e) => { println!("failed to decode... {}, err {:#?}", text, e); }
             }

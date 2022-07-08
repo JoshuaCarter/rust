@@ -10,6 +10,8 @@ infra = { path = "../infra", version = "*" }                # our infra lib
 tonic = { version = "0", features = ["transport", "tls"] }  # grpc lib
 futures = "0.3"                                             # promises
 tokio = { version = "1", features = ["full"] }              # allows async main
+tokio-stream = "0.1.9"                                                                      # steam lib
 dotenvy = "0.15.1"                                          # .env file lib
 anyhow = "1.0"                                              # error agnositc result lib
 clap =  { version = "3.2", features = ["derive"] }          # cli lib
+ctrlc = "3.0"                                               # ctrl+c handler

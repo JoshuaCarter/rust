@@ -23,3 +23,4 @@ lazy-regex = "2.3"                                                              
 strum = "0.24"                                                                              # STRing/enUM util lib
 strum_macros = "0.24"                                                                       # STRing/enUM macro lib
 url = "2.2"                                                                                 # url struct (for ws)
+ctrlc = "3.0"                                                                               # ctrl+c handler
