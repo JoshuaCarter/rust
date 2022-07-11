@@ -21,6 +21,7 @@ strum = "0.24"                                                                  
 strum_macros = "0.24"                                                                       # STRing/enUM macro lib
 tonic = "0"                                                                                 # grpc lib
 prost = "0.10"                                                                              # proto lib
+enclose = "1.1"                                                                             # closure clone helper
 
 [build-dependencies]
 tonic-build = "0"                                                                           # proto grpc builder lib

@@ -24,3 +24,4 @@ strum = "0.24"                                                                  
 strum_macros = "0.24"                                                                       # STRing/enUM macro lib
 url = "2.2"                                                                                 # url struct (for ws)
 ctrlc = "3.0"                                                                               # ctrl+c handler
+enclose = "1.1"                                                                             # closure clone helper

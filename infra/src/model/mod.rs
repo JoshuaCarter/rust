@@ -4,10 +4,12 @@ pub mod venue;
 pub mod common { tonic::include_proto!("common"); pub use super::common_proto::*; }
 pub mod trading { tonic::include_proto!("trading"); pub use super::trading_proto::*; }
 pub mod market { tonic::include_proto!("market"); pub use super::market_proto::*; }
-pub mod health { tonic::include_proto!("health"); }
+pub mod health { tonic::include_proto!("health"); pub use super::health_proto::*; }
+pub mod message_stream { tonic::include_proto!("message_stream"); pub use super::message_stream_proto::*; }
 
 // contains implementations for types imported from proto files
 mod common_proto;
 mod trading_proto;
 mod market_proto;
-
+mod health_proto;
+mod message_stream_proto;

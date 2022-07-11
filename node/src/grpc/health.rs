@@ -1,40 +1,27 @@
+use infra::model::message_stream::MessageStreamReply;
 use infra::model::health::*;
-use infra::model::health::health_server::Health;
-use tokio::sync::mpsc;
-use tonic::{
-    Request,
-    Response,
-    Status,
-    Streaming,
-};
-use tokio_stream::wrappers::ReceiverStream;
-use super::GrpcStream;
+use super::GrpcSender;
 
-#[derive(Debug, Default)]
-pub struct HealthService {}
+#[derive(Debug, Clone)]
+pub struct HealthService {
+    sender: GrpcSender,
+}
+impl HealthService {
+    pub fn new(sender: GrpcSender) -> Self {
+        return HealthService { sender };
+    }
+}
 
 #[tonic::async_trait]
-impl Health for HealthService {
-    type PingStream = GrpcStream<PingPong>;
-
-    async fn ping(&self, reqeust: Request<Streaming<PingPong>>) -> Result<Response<Self::PingStream>, Status> {
-        let mut req = reqeust.into_inner();
-
-        let (grpc_tx, grpc_rx) = mpsc::channel::<Result<PingPong, Status>>(1);
-
-        tokio::spawn(async move {
-            // ping the pongs
-            while let Ok(Some(ping)) = req.message().await {
-                // send to client
-                let pong = PingPong { sequence: ping.sequence + 1 };
-                match grpc_tx.send(Ok(pong)).await {
-                    Ok(_) => { infra::utils::time::delay(100).await; },
-                    Err(_) => { println!("PING DISCON @ {}", infra::utils::time::now_ms()); break; }, // failed to send to client
-                }
-            }
-        });
-
-        let output_stream = Box::pin(ReceiverStream::new(grpc_rx)) as Self::PingStream;
-        return Ok(Response::new(output_stream));
+impl HealthServer for HealthService {
+    async fn handle_ping(&self, msg: PingMessage) -> Result<(), tonic::Status> {
+        infra::utils::time::delay(10000).await; // TEMP?
+        match self.sender.send(Ok(MessageStreamReply::from(PingMessage::new()))).await {
+            Ok(_) => { return Ok(()); },
+            Err(e) => {
+                println!("Ping failed due to {}", e);
+                return Err(tonic::Status::internal(e.to_string()));
+            },
+        }
     }
 }

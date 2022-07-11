@@ -1,5 +1,9 @@
-
 use super::{market::*, common::*};
+
+#[tonic::async_trait]
+pub trait MarketServer {
+    async fn handle_book(&self, call: BookUpdatesCall) -> Result<(), tonic::Status>;
+}
 
 #[derive(Debug, Clone)]
 pub struct BookUpdatesRequest {

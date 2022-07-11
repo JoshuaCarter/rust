@@ -1,5 +1,11 @@
 use super::{trading::*, common::*};
 
+#[tonic::async_trait]
+pub trait TradingServer {
+    async fn handle_new(&self, call: NewOrderCall) -> Result<(), tonic::Status>;
+    async fn handle_cxl(&self, call: CxlOrderCall) -> Result<(), tonic::Status>;
+}
+
 #[derive(Debug, Clone)]
 pub struct NewOrderRequest {
     pub exchange: Exchange,

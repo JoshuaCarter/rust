@@ -1,0 +1,24 @@
+syntax = "proto3";
+package message_stream;
+
+import "trading.proto";
+import "market.proto";
+import "health.proto";
+
+service MessageStream {
+    rpc Message (stream MessageStreamCall) returns (stream MessageStreamReply);
+}
+
+message MessageStreamCall {
+    optional trading.NewOrderCall new = 1;
+    optional trading.CxlOrderCall cxl = 2;
+    optional market.BookUpdatesCall book = 3;
+    optional health.PingMessage ping = 4;
+}
+
+message MessageStreamReply {
+    optional trading.NewOrderReply new = 1;
+    optional trading.CxlOrderReply cxl = 2;
+    optional market.BookUpdatesReply book = 3;
+    optional health.PingMessage ping = 4;
+}

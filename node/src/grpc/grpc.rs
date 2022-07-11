@@ -1,15 +1,11 @@
-use std::{net::SocketAddr, str::FromStr, pin::Pin};
+use std::{net::SocketAddr, str::FromStr};
 use anyhow::Result;
-use futures::Stream;
+use tokio::sync::mpsc::Sender;
 use tonic::{transport::Server, metadata::{MetadataValue, Ascii}, Status, service::Interceptor};
-use infra::model::trading::trading_server::*;
-use infra::model::market::market_server::*;
-use infra::model::health::health_server::*;
-use super::trading::TradingService;
-use super::market::MarketService;
-use super::health::HealthService;
+use infra::model::message_stream::{message_stream_server::*, MessageStreamReply};
+use super::message_stream::MessageStreamService;
 
-pub type GrpcStream<T> = Pin<Box<dyn Send + Stream<Item = Result<T, Status>>>>;
+pub type GrpcSender = Sender<Result<MessageStreamReply, Status>>;
 
 #[derive(Clone)]
 pub struct GrpcInterceptor {
@@ -36,9 +32,7 @@ pub async fn start_server(uri: &str) -> Result<()> {
     Server::builder()
         .concurrency_limit_per_connection(128)
         .layer(tonic::service::interceptor(interceptor))
-        .add_service(TradingServer::new(TradingService::default()))
-        .add_service(MarketServer::new(MarketService::default()))
-        .add_service(HealthServer::new(HealthService::default()))
+        .add_service(MessageStreamServer::new(MessageStreamService::default()))
         .serve(addy)
         .await?;
 

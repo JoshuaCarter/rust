@@ -1,36 +1,51 @@
-use tonic::{
-    Request,
-    Response,
-    Status,
+use tonic::Status;
+use infra::model::{
+    venue::*,
+    trading::*,
+    message_stream::MessageStreamReply,
 };
-use infra::model::venue::*;
-use infra::model::trading::*;
-use infra::model::trading::trading_server::Trading;
 use crate::venues;
+use super::GrpcSender;
 
-#[derive(Debug, Default)]
-pub struct TradingService {}
+#[derive(Debug, Clone)]
+pub struct TradingService {
+    sender: GrpcSender,
+}
+
+impl TradingService {
+    pub fn new(sender: GrpcSender) -> Self {
+        return TradingService { sender };
+    }
+}
 
 #[tonic::async_trait]
-impl Trading for TradingService {
-    async fn new_order(&self, request: Request<NewOrderCall>) -> Result<Response<NewOrderReply>, Status> {
-        let req = NewOrderRequest::from(request.into_inner());
-        println!("NEW REQ: {:#?}", req);
+impl TradingServer for TradingService {
+    async fn handle_new(&self, call: NewOrderCall) -> Result<(), tonic::Status> {
+        let req = NewOrderRequest::from(call);
+        println!("New req {:?}", req);
 
         let mut venue = venues::create_venue(req.exchange).map_err(err_to_status)?;
         let res = venue.new_order(req).await.map_err(err_to_status)?;
 
-        return Ok(Response::new(NewOrderReply::from(res)));
+        let reply = MessageStreamReply::from(NewOrderReply::from(res));
+        println!("send new res");
+        self.sender.send(Ok(reply)).await.map_err(err_to_status)?;
+
+        return Ok(());
     }
 
-    async fn cxl_order(&self, request: Request<CxlOrderCall>) -> Result<Response<CxlOrderReply>, Status> {
-        let req = CxlOrderRequest::from(request.into_inner());
-        println!("CXL REQ: {:#?}", req);
+    async fn handle_cxl(&self, call: CxlOrderCall) -> Result<(), tonic::Status> {
+        let req = CxlOrderRequest::from(call);
+        println!("Cxl req {:?}", req);
 
         let mut venue = venues::create_venue(req.exchange).map_err(err_to_status)?;
         let res = venue.cxl_order(req).await.map_err(err_to_status)?;
 
-        return Ok(Response::new(CxlOrderReply::from(res)));
+        let reply = MessageStreamReply::from(CxlOrderReply::from(res));
+        println!("send cxl res");
+        self.sender.send(Ok(reply)).await.map_err(err_to_status)?;
+
+        return Ok(());
     }
 }
 

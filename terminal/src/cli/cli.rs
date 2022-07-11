@@ -5,8 +5,6 @@ use infra::model::common::*;
 use infra::model::market::*;
 use infra::model::trading::*;
 
-pub use clap::Parser;
-
 #[derive(Debug)]
 pub enum Trading {
     NewOrder(NewOrderCall),
@@ -27,8 +25,7 @@ pub enum Task {
 /// Process command line args into an order object
 pub fn process_input() -> Result<Task>
 {
-    let app = make_app();
-    return app_to_task(app);
+    return app_to_task(make_app().get_matches());
 }
 
 fn make_app() -> Box<App<'static>> {
@@ -78,8 +75,9 @@ fn arg_parse<T: FromStr>(args: &ArgMatches, name: &str) -> Result<T, anyhow::Err
     }
 }
 
-fn app_to_task(app: Box<App>) -> Result<Task> {
-    match app.get_matches().subcommand() {
+fn app_to_task(app: ArgMatches) -> Result<Task> {
+    println!("\nSUB {:?}\n", app.subcommand());
+    match app.subcommand() {
         Some(("new", args)) => {
             let exchange = arg_parse::<Exchange>(args, "EXCHANGE")?;
             let symbol = arg_parse::<Symbol>(args, "SYMBOL")?;

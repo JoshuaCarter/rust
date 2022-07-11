@@ -3,11 +3,6 @@ package trading;
 
 import "common.proto";
 
-service Trading {
-    rpc NewOrder (NewOrderCall) returns (NewOrderReply);
-    rpc CxlOrder (CxlOrderCall) returns (CxlOrderReply);
-}
-
 message NewOrderCall {
     common.Exchange exchange = 1;
     common.Symbol symbol = 2;

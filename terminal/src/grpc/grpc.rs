@@ -1,23 +1,19 @@
 use std::str::FromStr;
 use anyhow::Result;
-use infra::model::{trading::trading_client::TradingClient, market::market_client::MarketClient, health::{health_client::HealthClient, PingPong}};
-use tonic::{transport::{Channel, Endpoint}, metadata::{MetadataValue, Ascii}, codegen::InterceptedService, Status, service::Interceptor};
-use tokio::sync::mpsc;
+use infra::model::{
+    health::*,
+    message_stream::{*, message_stream_client::MessageStreamClient},
+};
+use tonic::{transport::Endpoint, metadata::{MetadataValue, Ascii}, Status, service::Interceptor};
+use tokio::{sync::mpsc::{self, Sender}, task::JoinHandle};
 use tokio_stream::wrappers::ReceiverStream;
 
-type GrpcService = InterceptedService<Channel, GrpcInterceptor>;
-
-pub struct GrpcClient {
-    pub trading: TradingClient<GrpcService>,
-    pub market: MarketClient<GrpcService>,
-    pub health: HealthClient<GrpcService>,
-}
+pub type GrpcClient = Sender<MessageStreamCall>;
 
 #[derive(Clone)]
 pub struct GrpcInterceptor {
     token: MetadataValue<Ascii>,
 }
-
 impl Interceptor for GrpcInterceptor {
     fn call(&mut self, mut req: tonic::Request<()>) -> Result<tonic::Request<()>, Status> {
         req.metadata_mut().insert("authorization", self.token.clone());
@@ -25,49 +21,58 @@ impl Interceptor for GrpcInterceptor {
     }
 }
 
-pub async fn start_client(uri: &str) -> Result<GrpcClient> {
+pub async fn start_client(uri: &str) -> Result<(GrpcClient, JoinHandle<()>)> {
     let endpoint = Endpoint::from_str(uri)?;
     let channel = endpoint.connect().await?;
     let interceptor = GrpcInterceptor {
         token: "TOKEN".parse()?,
     };
 
-    let client = GrpcClient {
-        trading: TradingClient::with_interceptor(channel.clone(), interceptor.clone()),
-        market: MarketClient::with_interceptor(channel.clone(), interceptor.clone()),
-        health: HealthClient::with_interceptor(channel, interceptor),
-    };
+    let mut client = MessageStreamClient::with_interceptor(channel, interceptor);
+    let (grpc_tx, grpc_rx) = mpsc::channel::<MessageStreamCall>(1);
 
-    ping(client.health.clone()).await?;
-
-    return Ok(client);
-}
-
-async fn ping(mut client: HealthClient<GrpcService>) -> Result<()> {
-    let (grpc_tx, grpc_rx) = mpsc::channel::<PingPong>(1);
-
-    // initial ping
-    let res = client.ping(ReceiverStream::new(grpc_rx)).await?;
+    // establish message stream
+    let res = client.message(ReceiverStream::new(grpc_rx)).await?;
     let mut stream = res.into_inner();
 
-    tokio::spawn(async move {
-        // send intial ping
-        match grpc_tx.send(PingPong { sequence: 0 }).await {
-            Ok(_) => {
-                // ping the pongs
-                while let Ok(Some(ping)) = stream.message().await {
-                    // send to server
-                    let pong = PingPong { sequence: ping.sequence + 1 };
-                    match grpc_tx.send(pong).await {
-                        Ok(_) => continue,
-                        Err(_) => { println!("PING DISCON @ {}", infra::utils::time::now_ms()); break; },
+    // listen for messages
+    let handle = infra::spawn!((grpc_tx) => {
+        println!("waiting");
+        while let msg = stream.message().await {
+            match msg {
+                Ok(Some(rep)) => {
+                    if let Some(new) = rep.new {
+                        println!("Got new {:?}", new);
+                    }
+                    if let Some(cxl) = rep.cxl {
+                        println!("Got cxl {:?}", cxl);
+                    }
+                    if let Some(book) = rep.book {
+                        println!("Got book {:?}", book);
+                    }
+                    if let Some(ping) = rep.ping {
+                        println!("Got ping");
+                        match grpc_tx.send(MessageStreamCall::from(PingMessage::new())).await {
+                            Ok(_) => {},
+                            Err(e) => {
+                                println!("Ping failed due to {}", e);
+                            },
+                        }
                     }
                 }
-            },
-            Err(_) => { println!("INITIAL PING FAILED @ {}", infra::utils::time::now_ms()); },
+                Ok(None) => { println!("Connection gone"); break; }
+                Err(e) => { println!("Message failed due to {}", e); }
+            }
         }
-
+        println!("done waiting");
     });
 
-    return Ok(());
+    // send initial ping
+    println!("send ping");
+    match grpc_tx.send(MessageStreamCall::from(PingMessage::new())).await {
+        Ok(_) => { println!("ping sent"); }
+        Err(e) => { println!("Initial ping failed due to {}", e); },
+    }
+
+    return Ok((grpc_tx, handle));
 }

@@ -149,7 +149,6 @@ impl MarketVenue for Binance {
             let sock_msg = serde_json::from_str::<api::SockDepthStreamMessage>(text.as_str());
             match sock_msg {
                 Ok(msg) => {
-
                     let res = BookUpdatesMessage {
                         exchange: req.exchange,
                         symbol: req.symbol.clone(),
@@ -162,7 +161,6 @@ impl MarketVenue for Binance {
                         Ok(_) => {}
                         Err(_) => { println!("binance listener gone"); break; }
                     }
-                    utils::time::delay(10000).await;
                 }
                 Err(e) => { println!("failed to decode... {}, err {:#?}", text, e); }
             }

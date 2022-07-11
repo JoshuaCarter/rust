@@ -1,50 +1,54 @@
 use infra::model::venue::MarketVenue;
 use tokio::sync::mpsc;
-use tonic::{
-    Request,
-    Response,
-    Status,
+use tonic::Status;
+use infra::model::{
+    market::*,
+    message_stream::*,
 };
-use infra::model::market::*;
-use infra::model::market::market_server::Market;
-use tokio_stream::wrappers::ReceiverStream;
 use crate::venues;
-use super::GrpcStream;
+use super::GrpcSender;
 
-#[derive(Debug, Default)]
-pub struct MarketService {}
+#[derive(Debug, Clone)]
+pub struct MarketService {
+    sender: GrpcSender,
+}
+
+impl MarketService {
+    pub fn new(sender: GrpcSender) -> Self {
+        return MarketService { sender };
+    }
+}
 
 #[tonic::async_trait]
-impl Market for MarketService {
-    type BookUpdatesStream = GrpcStream<BookUpdatesReply>;
+impl MarketServer for MarketService {
+    async fn handle_book(&self, call: BookUpdatesCall) -> Result<(), tonic::Status> {
+        let req = BookUpdatesRequest::from(call);
+        println!("Book req {:?}", req);
 
-    async fn book_updates(&self, request: Request<BookUpdatesCall>) -> Result<Response<Self::BookUpdatesStream>, Status> {
-        let req = BookUpdatesRequest::from(request.into_inner());
-        println!("BOOK REQ: {:#?}", req);
-
-        let (grpc_tx, grpc_rx) = mpsc::channel::<Result<BookUpdatesReply, Status>>(1);
         let mut venue = venues::create_venue(req.exchange).map_err(err_to_status)?;
-
         let (exch_tx, mut exch_rx) = mpsc::channel::<BookUpdatesMessage>(1);
 
-        tokio::spawn(async move {
-            // await venue msg
+        infra::spawn!((self.sender => sender) => {
+            // listen for venue messages
             while let Some(res) = exch_rx.recv().await {
                 // send to client
-                match grpc_tx.send(Ok(BookUpdatesReply::from(res))).await {
+                let reply = MessageStreamReply::from(BookUpdatesReply::from(res));
+                match sender.send(Ok(reply)).await {
                     Ok(_) => continue,
-                    Err(_) => { println!("BOOK DISCON @ {}", infra::utils::time::now_ms()); break; }, // failed to send to client
+                    Err(_) => {
+                        println!("Book disconnected @ {}", infra::utils::time::now_ms());
+                        break;
+                    },
                 }
             }
         });
 
-        tokio::spawn(async move {
-            // run venue, sends msgs to other thread
+        infra::spawn!(() => {
+            // run venue, generates message
             venue.book_updates(req, exch_tx).await.unwrap();
         });
 
-        let output_stream = Box::pin(ReceiverStream::new(grpc_rx)) as Self::BookUpdatesStream;
-        return Ok(Response::new(output_stream));
+        Ok(())
     }
 }
 

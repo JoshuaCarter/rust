@@ -2,6 +2,9 @@
 #![allow(clippy::module_inception)]
 #![allow(clippy::new_without_default)]
 
+use infra::model::message_stream::MessageStreamCall;
+use tokio::sync::mpsc::Sender;
+
 mod cli;
 mod grpc;
 
@@ -18,39 +21,42 @@ async fn main() -> anyhow::Result<()> {
     let task = cli::process_input()?;
 
     let uri = format!("http://{}", std::env::var("ENV_NODE_URI").unwrap());
-    let mut grpc_client = grpc::start_client(uri.as_str()).await?;
+    let (grpc_client, join_handle) = grpc::start_client(uri.as_str()).await?;
 
     match task {
         cli::Task::Trading(x) => {
             match x {
-                cli::Trading::NewOrder(req) => {
-                    println!("{:#?}", req);
-                    let res = grpc_client.trading.new_order(req).await?;
-                    println!("{:#?}", res);
+                cli::Trading::NewOrder(call) => {
+                    send(grpc_client, MessageStreamCall::from(call)).await;
                 }
-                cli::Trading::CxlOrder(req) => {
-                    println!("{:#?}", req);
-                    let res = grpc_client.trading.cxl_order(req).await?;
-                    println!("{:#?}", res);
+                cli::Trading::CxlOrder(call) => {
+                    send(grpc_client, MessageStreamCall::from(call)).await;
                 }
             }
         }
         cli::Task::Market(x) => {
             match x {
-                cli::Market::BookUpdates(req) => {
-                    println!("{:#?}", req);
-                    let res = grpc_client.market.book_updates(req).await?;
-                    println!("{:#?}", res);
-
-                    let mut stream = res.into_inner();
-
-                    while let Some(rep) = stream.message().await? {
-                        println!("{:#?}", rep);
-                    }
+                cli::Market::BookUpdates(call) => {
+                    send(grpc_client, MessageStreamCall::from(call)).await;
                 }
             }
         }
     }
 
+    match join_handle.await {
+        Ok(_) => { println!("Session complete"); }
+        Err(e) => { println!("Session error: {}", e); }
+    }
+    println!("EXIT");
+
     return Ok(());
+}
+
+async fn send(grpc_client: Sender<MessageStreamCall>, call: MessageStreamCall) {
+    infra::spawn!((grpc_client) => {
+        match grpc_client.send(call).await {
+            Ok(_) => { println!("Send success"); }
+            Err(x) => { println!("Send error {}", x); }
+        }
+    });
 }
