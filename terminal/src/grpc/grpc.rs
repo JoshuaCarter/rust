@@ -68,11 +68,11 @@ pub async fn start_client(uri: &str) -> Result<(GrpcClient, JoinHandle<()>)> {
     });
 
     // send initial ping
-    println!("send ping");
-    match grpc_tx.send(MessageStreamCall::from(PingMessage::new())).await {
-        Ok(_) => { println!("ping sent"); }
-        Err(e) => { println!("Initial ping failed due to {}", e); },
-    }
+    // println!("send ping");
+    // match grpc_tx.send(MessageStreamCall::from(PingMessage::new())).await {
+    //     Ok(_) => { println!("ping sent"); }
+    //     Err(e) => { println!("Initial ping failed due to {}", e); },
+    // }
 
     return Ok((grpc_tx, handle));
 }
