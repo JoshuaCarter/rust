@@ -1,5 +1,7 @@
 # Rust Getting Started Guide
 
+test
+
 # Useful Links
 
 - [Rust docs](https://doc.rust-lang.org/book/)
